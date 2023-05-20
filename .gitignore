@@ -1,0 +1,14 @@
+build
+./bin/*
+./lib/*
+./include/advection/*
+share
+cmake.txt
+*.mod
+*.o
+*.swp
+*.gcda
+*.a
+*.pp.f90
+dwarf
+
