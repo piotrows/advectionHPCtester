@@ -56,7 +56,7 @@ MODULE mpi_parallel
    CHARACTER clabels(maxtimers)*25
    CHARACTER(LEN=2) clabclr(maxtimers)
   INTEGER :: MPI_MAXMIN,MPI_SUMAX,MPI_SUMAXMIN, MPI_SUMAXMINLOC
-
+!
 
 CONTAINS
    SUBROUTINE end_code

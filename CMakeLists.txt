@@ -137,36 +137,44 @@ advection_test_setup.f90
 )
 
 
-foreach( file_i ${common_sources_to_preprocess})
- execute_process(COMMAND cp ${file_i} ${file_i}.pp.f90
-               WORKING_DIRECTORY  ${PROJECT_SOURCE_DIR}/common )
-endforeach( file_i )
-foreach( file_i ${advection_alg_sources_to_preprocess})
- execute_process(COMMAND cp ${file_i} ${file_i}.pp.f90
-               WORKING_DIRECTORY  ${PROJECT_SOURCE_DIR}/advection/src_algorithms )
-endforeach( file_i )
-foreach( file_i ${advection_drv_sources_to_preprocess})
- execute_process(COMMAND cp ${file_i} ${file_i}.pp.f90
-               WORKING_DIRECTORY  ${PROJECT_SOURCE_DIR}/advection/src_drivers )
-endforeach( file_i )
-foreach( file_i ${advection_tst_sources_to_preprocess})
- execute_process(COMMAND cp ${file_i} ${file_i}.pp.f90
-               WORKING_DIRECTORY  ${PROJECT_SOURCE_DIR}/advection/src_testdata )
-endforeach( file_i )
+##foreach( file_i ${common_sources_to_preprocess})
+## execute_process(COMMAND cp ${file_i} ${file_i}.pp.f90
+##               WORKING_DIRECTORY  ${PROJECT_SOURCE_DIR}/common )
+##endforeach( file_i )
+#foreach( file_i ${advection_alg_sources_to_preprocess})
+# execute_process(COMMAND cp ${file_i} ${file_i}.pp.f90
+#               WORKING_DIRECTORY  ${PROJECT_SOURCE_DIR}/advection/src_algorithms )
+#endforeach( file_i )
+#foreach( file_i ${advection_drv_sources_to_preprocess})
+# execute_process(COMMAND cp ${file_i} ${file_i}.pp.f90
+#               WORKING_DIRECTORY  ${PROJECT_SOURCE_DIR}/advection/src_drivers )
+#endforeach( file_i )
+#foreach( file_i ${advection_tst_sources_to_preprocess})
+# execute_process(COMMAND cp ${file_i} ${file_i}.pp.f90
+#               WORKING_DIRECTORY  ${PROJECT_SOURCE_DIR}/advection/src_testdata )
+#endforeach( file_i )
 
 add_library(commontmp INTERFACE  )
 add_library(advectiontmp INTERFACE  )
 set(localdir "${PROJECT_SOURCE_DIR}/common")
 foreach( file_i ${common_sources_to_preprocess})
         message (STATUS "inside loop:${localdir}/${file_i}")
-        add_custom_target( ${file_i}.target
+        add_custom_command(
         COMMAND gcc-13 -E -P ${optsgpu} ${optsmpi}  -cpp  ${localdir}/${file_i}
         | sed -e "s/\&/\&\\n/g" -e "s/\;/\;\\n/g" -e "s/>>>/>>>\\n/g" -e "/^$/d" > "${localdir}/${file_i}.pp.f90"
         DEPENDS  ${localdir}/${file_i}
+        OUTPUT  ${localdir}/${file_i}.pp.f90
         COMMENT "Preprocessing ${PROJECT_SOURCE_DIR}/common/${file_i} to ${localdir}/${file_i}.pp.f90"
         VERBATIM
 )
-add_dependencies (commontmp ${file_i}.target)
+#        add_custom_target( ${file_i}.target
+#        COMMAND gcc-13 -E -P ${optsgpu} ${optsmpi}  -cpp  ${localdir}/${file_i}
+#        | sed -e "s/\&/\&\\n/g" -e "s/\;/\;\\n/g" -e "s/>>>/>>>\\n/g" -e "/^$/d" > "${localdir}/${file_i}.pp.f90"
+#        DEPENDS  ${localdir}/${file_i}
+#        COMMENT "Preprocessing ${PROJECT_SOURCE_DIR}/common/${file_i} to ${localdir}/${file_i}.pp.f90"
+#        VERBATIM
+#)
+#add_dependencies (commontmp ${file_i}.target)
 endforeach( file_i )
 
 set(localdir "${PROJECT_SOURCE_DIR}/advection/src_algorithms")
@@ -176,7 +184,7 @@ foreach( file_i ${advection_alg_sources_to_preprocess})
         COMMAND gcc-13 -E -P ${optsgpu} ${optsmpi} -cpp  ${localdir}/${file_i}
         | sed -e "s/\&/\&\\n/g" -e "s/\;/\;\\n/g" -e "s/>>>/>>>\\n/g" -e "/^$/d" > "${localdir}/${file_i}.pp.f90"
         DEPENDS  ${localdir}/${file_i}
-        COMMENT "Preprocessing ${PROJECT_SOURCE_DIR}/common/${file_i} to ${localdir}/${file_i}.pp.f90"
+        COMMENT "APreprocessing ${PROJECT_SOURCE_DIR}/common/${file_i} to ${localdir}/${file_i}.pp.f90"
         VERBATIM
 )
 add_dependencies (advectiontmp ${file_i}.target)
@@ -189,7 +197,7 @@ foreach( file_i ${advection_drv_sources_to_preprocess})
         COMMAND gcc-13 -E -P ${optsgpu} ${optsmpi} -cpp  ${localdir}/${file_i}
         | sed -e "s/\&/\&\\n/g" -e "s/\;/\;\\n/g" -e "s/>>>/>>>\\n/g" -e "/^$/d" > "${localdir}/${file_i}.pp.f90"
         DEPENDS  ${localdir}/${file_i}
-        COMMENT "Preprocessing ${PROJECT_SOURCE_DIR}/common/${file_i} to ${localdir}/${file_i}.pp.f90"
+        COMMENT "BPreprocessing ${PROJECT_SOURCE_DIR}/common/${file_i} to ${localdir}/${file_i}.pp.f90"
         VERBATIM
 )
 add_dependencies (advectiontmp ${file_i}.target)
@@ -202,46 +210,36 @@ foreach( file_i ${advection_tst_sources_to_preprocess})
         COMMAND gcc-13 -E -P ${optsmpi} ${optsgpu} -cpp  ${localdir}/${file_i}
         | sed -e "s/\&/\&\\n/g" -e "s/\;/\;\\n/g" -e "s/>>>/>>>\\n/g" -e "/^$/d" > "${localdir}/${file_i}.pp.f90"
         DEPENDS  ${localdir}/${file_i}
-        COMMENT "Preprocessing ${PROJECT_SOURCE_DIR}/common/${file_i} to ${localdir}/${file_i}.pp.f90"
+        COMMENT "CPreprocessing ${PROJECT_SOURCE_DIR}/common/${file_i} to ${localdir}/${file_i}.pp.f90"
         VERBATIM
 )
 add_dependencies (advectiontmp ${file_i}.target)
 endforeach( file_i )
 
 
-set(advection_sources ${advection_sources}
-
-advection/src_algorithms/mpdata3d-rho-gauge-gpubc.f90.pp.f90              
-advection/src_algorithms/mpdataoperators.inc             
-advection/src_algorithms/antidiff3d-gauge-gpubc.f90.pp.f90     
-advection/src_algorithms/module_velprd.f90.pp.f90               
-advection/src_algorithms/upwind3d-gpubc.f90.pp.f90              
-advection/src_algorithms/antidiff3d-standard-gpubc.f90.pp.f90  
-advection/src_algorithms/velprd_driver.f90.pp.f90
-
-advection/src_drivers/advec.f90.pp.f90
-advection/src_drivers/advection_CEtimestep_twostep_GPUBC.f90.pp.f90   
-advection/src_testdata/advection_test_setup.f90.pp.f90
-	)
-
-
+set(advection_sources ${advection_sources})
+list(TRANSFORM advection_alg_sources_to_preprocess PREPEND advection/src_algorithms/)
+list(TRANSFORM advection_alg_sources_to_preprocess APPEND .pp.f90)
+list(TRANSFORM advection_drv_sources_to_preprocess PREPEND advection/src_drivers/)
+list(TRANSFORM advection_drv_sources_to_preprocess APPEND .pp.f90)
+list(TRANSFORM advection_tst_sources_to_preprocess PREPEND advection/src_testdata/)
+list(TRANSFORM advection_tst_sources_to_preprocess APPEND .pp.f90)
+list(APPEND advection_sources ${advection_alg_sources_to_preprocess} )
+list(APPEND advection_sources ${advection_drv_sources_to_preprocess} )
+list(APPEND advection_sources ${advection_tst_sources_to_preprocess} )
 set(common_sources ${common_sources}
-common/precisions.f90
-common/eulag_datafields_modular.f90.pp.f90
-common/argsparser
-common/bconditions.f90
-common/diagutils.f90.pp.f90
-common/diagnostics.f90.pp.f90
-common/epsilons.f90
-common/eulag_lib_parameters.f90
-common/eulag_moist_datafields.f90.pp.f90
-common/filters.f90.pp.f90
-common/geometry.f90.pp.f90
-common/mpi_parallel.f90.pp.f90
-common/noise.f90
-common/geometry_datafields_modular.f90.pp.f90
-common/scratch_datafields_modular.f90.pp.f90
-common/argsparser/argsparser.f90)
+precisions.f90
+argsparser
+bconditions.f90
+epsilons.f90
+eulag_lib_parameters.f90
+noise.f90
+argsparser/argsparser.f90)
+
+list(TRANSFORM common_sources PREPEND common/)
+list(TRANSFORM common_sources_to_preprocess PREPEND common/)
+list(TRANSFORM common_sources_to_preprocess APPEND .pp.f90)
+list(APPEND common_sources ${common_sources_to_preprocess} )
 
 add_library(common    STATIC ${common_sources})   
 add_library(advection STATIC ${advection_sources})
@@ -263,4 +261,4 @@ set(execname_fullset tladvectiontest.cpu)
 endif()
 add_executable(${execname_single} "advection/src_testapps/advection_dwarf_test_modular.f90")
 add_dependencies(${execname_single} common advection )
-set_property(TARGET ${execname_single} PROPERTY LINKER_LANGUAGE Fortran)
+set_property(TARGET ${exename_single} PROPERTY LINKER_LANGUAGE Fortran)
