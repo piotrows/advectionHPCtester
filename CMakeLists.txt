@@ -155,66 +155,23 @@ set(destdir  "${CMAKE_BINARY_DIR}/${subdir}")
 set(subdir "common/argsparser")
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/${subdir}) 
 
-foreach( file_i ${common_sources})
-        message (STATUS "define preprocessing for file: ${localdir}/${file_i}")
-        add_custom_command(
-        COMMAND gcc-13 -E -P ${optsgpu} ${optsmpi}  -cpp  ${localdir}/${file_i}
-#        | sed -e "s/\&/\&\\n/g" -e "s/\;/\;\\n/g" -e "s/>>>/>>>\\n/g" -e "/^$/d" 
-        > "${destdir}/${file_i}"
-        DEPENDS  ${localdir}/${file_i}
-        OUTPUT  ${destdir}/${file_i}
-        COMMENT "Preprocessing ${localdir}/${file_i} to ${destdir}/${file_i}"
-        VERBATIM
-)
-endforeach( file_i )
-
-#foreach( file_i ${common_sources_preprocess})
+#foreach( file_i ${common_sources})
 #        message (STATUS "define preprocessing for file: ${localdir}/${file_i}")
 #        add_custom_command(
 #        COMMAND gcc-13 -E -P ${optsgpu} ${optsmpi}  -cpp  ${localdir}/${file_i}
-#        | sed -e "s/\&/\&\\n/g" -e "s/\;/\;\\n/g" -e "s/>>>/>>>\\n/g" -e "/^$/d" > "${destdir}/${file_i}.pp.f90"
+##        | sed -e "s/\&/\&\\n/g" -e "s/\;/\;\\n/g" -e "s/>>>/>>>\\n/g" -e "/^$/d" 
+#        > "${destdir}/${file_i}"
 #        DEPENDS  ${localdir}/${file_i}
-#        OUTPUT  ${destdir}/${file_i}.pp.f90
-#        COMMENT "Preprocessing ${localdir}/${file_i} to ${destdir}/${file_i}.pp.f90"
+#        OUTPUT  ${destdir}/${file_i}
+#        COMMENT "Preprocessing ${localdir}/${file_i} to ${destdir}/${file_i}"
 #        VERBATIM
 #)
 #endforeach( file_i )
+
 set(subdir "advection")
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/${subdir}) 
 
-#set(subdir "advection/src_algorithms")
-#file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/${subdir}) 
-#set(localdir "${PROJECT_SOURCE_DIR}/${subdir}")
-#set(destdir  "${CMAKE_BINARY_DIR}/${subdir}")
-#foreach( file_i ${advection_alg_sources_preprocess})
-#        message (STATUS "define preprocessing for file: ${localdir}/${file_i}")
-#        add_custom_command(
-#        COMMAND gcc-13 -E -P ${optsgpu} ${optsmpi} -cpp  ${localdir}/${file_i}
-#        | sed -e "s/\&/\&\\n/g" -e "s/\;/\;\\n/g" -e "s/>>>/>>>\\n/g" -e "/^$/d" > "${destdir}/${file_i}.pp.f90"
-#        DEPENDS  ${localdir}/${file_i}
-#        OUTPUT  ${destdir}/${file_i}.pp.f90
-#        COMMENT "Preprocessing ${localdir}/${file_i} to ${destdir}/${file_i}.pp.f90"
-#        VERBATIM
-#)
-#endforeach( file_i )
-
-#set(subdir "advection/src_drivers")
-#file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/${subdir}) 
-#set(localdir "${PROJECT_SOURCE_DIR}/${subdir}")
-#set(destdir  "${CMAKE_BINARY_DIR}/${subdir}")
-#foreach( file_i ${advection_drv_sources_preprocess})
-#        message (STATUS "define preprocessing for file: ${localdir}/${file_i}")
-#        add_custom_command(
-#        COMMAND gcc-13 -E -P ${optsgpu} ${optsmpi} -cpp  ${localdir}/${file_i}
-#        | sed -e "s/\&/\&\\n/g" -e "s/\;/\;\\n/g" -e "s/>>>/>>>\\n/g" -e "/^$/d" > "${destdir}/${file_i}.pp.f90"
-#        DEPENDS  ${localdir}/${file_i}
-#        OUTPUT  ${destdir}/${file_i}.pp.f90
-#        COMMENT "Preprocessing ${localdir}/${file_i} to ${destdir}/${file_i}.pp.f90"
-#        VERBATIM
-#)
-#endforeach( file_i )
-
-function(DEFINE_PREPROCESS subdir_arg files_arg)
+function(DEFINE_PREPROCESS_SED subdir_arg files_arg)
 set(subdir ${subdir_arg})
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/${subdir}) 
 set(localdir "${PROJECT_SOURCE_DIR}/${subdir}")
@@ -231,26 +188,29 @@ foreach( file_i ${files_arg})
 )
 endforeach( file_i )
 endfunction()
-define_preprocess("common" "${common_sources_preprocess}")
-define_preprocess("advection/src_algorithms" "${advection_alg_sources_preprocess}")
-define_preprocess("advection/src_drivers" "${advection_drv_sources_preprocess}")
-define_preprocess("advection/src_testdata" "${advection_tst_sources_preprocess}")
-
-#set(subdir "advection/src_testdata")
-#file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/${subdir}) 
-#set(localdir "${PROJECT_SOURCE_DIR}/${subdir}")
-#set(destdir  "${CMAKE_BINARY_DIR}/${subdir}")
-#foreach( file_i ${advection_tst_sources_preprocess})
-#        message (STATUS "define preprocessing for file: ${localdir}/${file_i}")
-#        add_custom_command( 
-#        COMMAND gcc-13 -E -P ${optsmpi} ${optsgpu} -cpp  ${localdir}/${file_i}
-#        | sed -e "s/\&/\&\\n/g" -e "s/\;/\;\\n/g" -e "s/>>>/>>>\\n/g" -e "/^$/d" > "${destdir}/${file_i}.pp.f90"
-#        DEPENDS  ${localdir}/${file_i}
-#        OUTPUT  ${destdir}/${file_i}.pp.f90
-#        COMMENT "Preprocessing ${localdir}/${file_i} to ${destdir}/${file_i}.pp.f90"
-#        VERBATIM
-#)
-#endforeach( file_i )
+function(DEFINE_PREPROCESS subdir_arg files_arg)
+set(subdir ${subdir_arg})
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/${subdir}) 
+set(localdir "${PROJECT_SOURCE_DIR}/${subdir}")
+set(destdir  "${CMAKE_BINARY_DIR}/${subdir}")
+foreach( file_i ${files_arg})
+        message (STATUS "define preprocessing for file: ${destdir}/${file_i}")
+        add_custom_command( 
+        COMMAND gcc-13 -E -P ${optsmpi} ${optsgpu} -cpp  ${localdir}/${file_i}
+       # | sed -e "s/\&/\&\\n/g" -e "s/\;/\;\\n/g" -e "s/>>>/>>>\\n/g" -e "/^$/d" 
+        > "${destdir}/${file_i}.pp.f90"
+        DEPENDS  ${localdir}/${file_i}
+        OUTPUT  ${destdir}/${file_i}.pp.f90
+        COMMENT "Preprocessing ${localdir}/${file_i} to ${destdir}/${file_i}.pp.f90"
+        VERBATIM
+)
+endforeach( file_i )
+endfunction()
+define_preprocess_sed("common" "${common_sources}")
+define_preprocess_sed("common" "${common_sources_preprocess}")
+define_preprocess_sed("advection/src_algorithms" "${advection_alg_sources_preprocess}")
+define_preprocess_sed("advection/src_drivers" "${advection_drv_sources_preprocess}")
+define_preprocess_sed("advection/src_testdata" "${advection_tst_sources_preprocess}")
 
 set(advection_sources ${advection_sources})
 list(TRANSFORM advection_alg_sources_preprocess PREPEND ${CMAKE_BINARY_DIR}/advection/src_algorithms/)
