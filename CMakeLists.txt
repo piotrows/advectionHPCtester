@@ -1,9 +1,14 @@
 cmake_minimum_required (VERSION 3.14.0)
 project(advectionHPCtester Fortran )
 enable_language (Fortran)
+
 set(CMAKE_Fortran_FLAGS "-g")
 #execute_process(COMMAND bash  "${PROJECT_SOURCE_DIR}/advection/src_algorithms/prepgpu.sh" 
 #  	        WORKING_DIRECTORY  "${PROJECT_SOURCE_DIR}/advection/src_algorithms/" )
+
+set(optsprecsp -DFLOAT_PRECISION=4) 
+set(optsprecdp -DFLOAT_PRECISION=8) 
+
 option(ENABLE_GPU "Configure for NVIDIA GPU" OFF)
 
 if(ENABLE_GPU)
@@ -18,7 +23,7 @@ else()
   set(optsgpu -DNOCUDACODE   )
 endif()
 
-option(ENABLE_MPI "Configure for MPI parallelization" ON)
+option(ENABLE_MPI "Configure for MPI parallelization" OFF)
 
 if(ENABLE_MPI)
   find_package(MPI REQUIRED COMPONENTS Fortran)
@@ -79,7 +84,7 @@ if(ENABLE_FAST)
 else()
 
   if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
-       set(optims  -ffree-form -fimplicit-none -cpp  )
+       set(optims  -ffree-form -fimplicit-none ) #-cpp  )
        set(debugs  -g -fbounds-check -fbacktrace -ffpe-trap=invalid,zero,overflow  -finit-real=snan  )
   endif()
   if(CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
@@ -87,7 +92,7 @@ else()
        set(debugs  -g -traceback -check bounds -ftrapuv -init=snan -implicitnone -fpe0 -ftz )
   endif()
   if(CMAKE_Fortran_COMPILER_ID MATCHES "NVHPC" OR CMAKE_Fortran_COMPILER_ID MATCHES "PGI")
-       set(optims  -O1 -Mpreprocess )
+       set(optims  -O1 ) #-Mpreprocess )
        set(debugs  -C traceback -Mbounds -Mchkfpstk -Kieee -Mlist -Mpreprocess )
   endif()
 
@@ -104,12 +109,8 @@ foreach(arg ${CMAKE_Fortran_FLAGS_TMP})
 endforeach(arg ${CMAKE_Fortran_FLAGS_TMP})
 message(STATUS "Compiling with flags: ${CMAKE_Fortran_FLAGS} ")
 
-set(commondir    "${PROJECT_SOURCE_DIR}/include/common")
-set(advectiondir "${PROJECT_SOURCE_DIR}/include/advection")
-
 set(common_sources ${common_sources}
 precisions.f90
-argsparser
 bconditions.f90
 epsilons.f90
 eulag_lib_parameters.f90
@@ -139,6 +140,7 @@ module_velprd.f90
 
 set(advection_drv_sources_preprocess ${advection_drv_sources_preprocess}
 advec.f90
+advec_init_finalize.f90
 advection_CEtimestep_twostep_GPUBC.f90
 )
 set(advection_tst_sources_preprocess ${advection_tst_sources_preprocess}
@@ -147,39 +149,16 @@ advection_test_setup.f90
 
 
 
-set(subdir "common")
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/${subdir}) 
-set(localdir "${PROJECT_SOURCE_DIR}/${subdir}")
-set(destdir  "${CMAKE_BINARY_DIR}/${subdir}")
 
-set(subdir "common/argsparser")
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/${subdir}) 
-
-#foreach( file_i ${common_sources})
-#        message (STATUS "define preprocessing for file: ${localdir}/${file_i}")
-#        add_custom_command(
-#        COMMAND gcc-13 -E -P ${optsgpu} ${optsmpi}  -cpp  ${localdir}/${file_i}
-##        | sed -e "s/\&/\&\\n/g" -e "s/\;/\;\\n/g" -e "s/>>>/>>>\\n/g" -e "/^$/d" 
-#        > "${destdir}/${file_i}"
-#        DEPENDS  ${localdir}/${file_i}
-#        OUTPUT  ${destdir}/${file_i}
-#        COMMENT "Preprocessing ${localdir}/${file_i} to ${destdir}/${file_i}"
-#        VERBATIM
-#)
-#endforeach( file_i )
-
-set(subdir "advection")
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/${subdir}) 
-
-function(DEFINE_PREPROCESS_SED subdir_arg files_arg)
+function(DEFINE_PREPROCESS_SED subdir_arg destdir_arg files_arg custopt_arg)
 set(subdir ${subdir_arg})
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/${subdir}) 
+file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/${destdir_arg}/${subdir}") 
 set(localdir "${PROJECT_SOURCE_DIR}/${subdir}")
-set(destdir  "${CMAKE_BINARY_DIR}/${subdir}")
+set(destdir  "${destdir_arg}/${subdir}")
 foreach( file_i ${files_arg})
         message (STATUS "define preprocessing for file: ${destdir}/${file_i}")
         add_custom_command( 
-        COMMAND gcc-13 -E -P ${optsmpi} ${optsgpu} -cpp  ${localdir}/${file_i}
+        COMMAND gcc-13 -E -P ${optsmpi} ${optsgpu} ${custopt_arg} -cpp  ${localdir}/${file_i}
         | sed -e "s/\&/\&\\n/g" -e "s/\;/\;\\n/g" -e "s/>>>/>>>\\n/g" -e "/^$/d" > "${destdir}/${file_i}.pp.f90"
         DEPENDS  ${localdir}/${file_i}
         OUTPUT  ${destdir}/${file_i}.pp.f90
@@ -188,63 +167,117 @@ foreach( file_i ${files_arg})
 )
 endforeach( file_i )
 endfunction()
-function(DEFINE_PREPROCESS subdir_arg files_arg)
-set(subdir ${subdir_arg})
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/${subdir}) 
-set(localdir "${PROJECT_SOURCE_DIR}/${subdir}")
-set(destdir  "${CMAKE_BINARY_DIR}/${subdir}")
-foreach( file_i ${files_arg})
-        message (STATUS "define preprocessing for file: ${destdir}/${file_i}")
-        add_custom_command( 
-        COMMAND gcc-13 -E -P ${optsmpi} ${optsgpu} -cpp  ${localdir}/${file_i}
-       # | sed -e "s/\&/\&\\n/g" -e "s/\;/\;\\n/g" -e "s/>>>/>>>\\n/g" -e "/^$/d" 
-        > "${destdir}/${file_i}.pp.f90"
-        DEPENDS  ${localdir}/${file_i}
-        OUTPUT  ${destdir}/${file_i}.pp.f90
-        COMMENT "Preprocessing ${localdir}/${file_i} to ${destdir}/${file_i}.pp.f90"
-        VERBATIM
-)
-endforeach( file_i )
-endfunction()
-define_preprocess_sed("common" "${common_sources}")
-define_preprocess_sed("common" "${common_sources_preprocess}")
-define_preprocess_sed("advection/src_algorithms" "${advection_alg_sources_preprocess}")
-define_preprocess_sed("advection/src_drivers" "${advection_drv_sources_preprocess}")
-define_preprocess_sed("advection/src_testdata" "${advection_tst_sources_preprocess}")
 
-set(advection_sources ${advection_sources})
-list(TRANSFORM advection_alg_sources_preprocess PREPEND ${CMAKE_BINARY_DIR}/advection/src_algorithms/)
+function(GENERATE_BUILD buildtype_arg specopts_arg driverfile_arg) 
+set(buildtype ${buildtype_arg})
+set(specopts  ${specopts_arg} )
+set(driverfile ${driverfile_arg} )
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/${buildtype}/common) 
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/${buildtype}/common/argsparser) 
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/${buildtype}/advection) 
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/${buildtype}/include) 
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/${buildtype}/lib) 
+set(advection_sources )  
+
+define_preprocess_sed("common" "${buildtype}" "${common_sources}"            "${specopts}")
+define_preprocess_sed("common" "${buildtype}" "${common_sources_preprocess}" "${specopts}")
+define_preprocess_sed("advection/src_algorithms" "${buildtype}" "${advection_alg_sources_preprocess}" "${specopts}")
+
+define_preprocess_sed("advection/src_drivers"    "${buildtype}" "${advection_drv_sources_preprocess}" "${specopts}")
+define_preprocess_sed("advection/src_testdata"   "${buildtype}" "${advection_tst_sources_preprocess}" "${specopts}")
+
+list(TRANSFORM advection_alg_sources_preprocess PREPEND ${CMAKE_BINARY_DIR}/${buildtype}/advection/src_algorithms/)
 list(TRANSFORM advection_alg_sources_preprocess APPEND .pp.f90)
-list(TRANSFORM advection_drv_sources_preprocess PREPEND ${CMAKE_BINARY_DIR}/advection/src_drivers/)
+list(TRANSFORM advection_drv_sources_preprocess PREPEND ${CMAKE_BINARY_DIR}/${buildtype}/advection/src_drivers/)
 list(TRANSFORM advection_drv_sources_preprocess APPEND .pp.f90)
-list(TRANSFORM advection_tst_sources_preprocess PREPEND ${CMAKE_BINARY_DIR}/advection/src_testdata/)
+list(TRANSFORM advection_tst_sources_preprocess PREPEND ${CMAKE_BINARY_DIR}/${buildtype}/advection/src_testdata/)
 list(TRANSFORM advection_tst_sources_preprocess APPEND .pp.f90)
 list(APPEND advection_sources ${advection_alg_sources_preprocess} )
 list(APPEND advection_sources ${advection_drv_sources_preprocess} )
 list(APPEND advection_sources ${advection_tst_sources_preprocess} )
 
-list(TRANSFORM common_sources PREPEND common/)
-list(TRANSFORM common_sources_preprocess PREPEND ${CMAKE_BINARY_DIR}/common/)
+list(TRANSFORM common_sources            PREPEND ${CMAKE_BINARY_DIR}/${buildtype}/common/)
+list(TRANSFORM common_sources            APPEND .pp.f90)
+list(TRANSFORM common_sources_preprocess PREPEND ${CMAKE_BINARY_DIR}/${buildtype}/common/)
 list(TRANSFORM common_sources_preprocess APPEND .pp.f90)
 list(APPEND common_sources ${common_sources_preprocess} )
 
-add_library(common    STATIC ${common_sources})   
-add_library(advection STATIC ${advection_sources})
-add_dependencies(advection common )
+add_library(common_${buildtype}    ${common_sources})   
+add_library(advection_${buildtype} ${advection_sources})
+add_dependencies(advection_${buildtype}  common_${buildtype} )
 
-set_target_properties(common    PROPERTIES Fortran_MODULE_DIRECTORY ${commondir})
-set_target_properties(advection PROPERTIES Fortran_MODULE_DIRECTORY ${advectiondir})
-include_directories(${commondir} ${advectiondir}) # ${solverdir} ${diffusiondir})
+set(commondir    ${CMAKE_BINARY_DIR}/${buildtype}/include)
+set(advectiondir ${CMAKE_BINARY_DIR}/${buildtype}/include)
+set_target_properties(   common_${buildtype} PROPERTIES Fortran_MODULE_DIRECTORY ${commondir})
+set_target_properties(   common_${buildtype} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${buildtype}/lib)
+set_target_properties(advection_${buildtype} PROPERTIES Fortran_MODULE_DIRECTORY ${advectiondir})
+set_target_properties(advection_${buildtype} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${buildtype}/lib)
+target_include_directories(common_${buildtype} PRIVATE ${commondir} ) # ${solverdir} ${diffusiondir})
+target_include_directories(advection_${buildtype} PRIVATE ${advectiondir}) # ${solverdir} ${diffusiondir})
 
-link_libraries(${MPI_Fortran_LIBRARIES} common advection)
+list(TRANSFORM driverfile PREPEND ${CMAKE_SOURCE_DIR}/advection/src_drivers/)
+add_library(advection_interface_${buildtype} ${driverfile})
+add_dependencies(advection_interface_${buildtype}  advection_${buildtype} )
+target_include_directories(advection_interface_${buildtype} PRIVATE ${commondir} ) 
+target_include_directories(advection_interface_${buildtype} PRIVATE ${advectiondir}) 
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/include) 
+set_target_properties(advection_interface_${buildtype} PROPERTIES Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
+set_target_properties(advection_interface_${buildtype} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+
+endfunction()
+
+set(buildtype sp)
+set(driverfile advec_interface_${buildtype}.f90 )
+generate_build(${buildtype} ${optsprecsp} ${driverfile}) 
+#if(ENABLE_GPU)
+#add_link_options( -cuda -lnvToolsExt)
+#set(execname_single advectiontest.gpu.${buildtype})
+##set(execname_fullset tladvectiontest.gpu)
+#else()
+#set(execname_single advectiontest.cpu.${buildtype})
+##set(execname_fullset tladvectiontest.cpu)
+#endif()
+#add_executable(${execname_single} "advection/src_testapps/advection_dwarf_test_minimal.f90")
+#add_dependencies(${execname_single} common_${buildtype} advection_${buildtype} )
+#set_property(TARGET ${exename_single} PROPERTY LINKER_LANGUAGE Fortran)
+#set_property(TARGET ${exename_single} PROPERTY LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${buildtype}/lib)
+#
+set(buildtype dp)
+set(driverfile advec_interface_${buildtype}.f90)
+generate_build(${buildtype} ${optsprecdp} ${driverfile}) 
+#if(ENABLE_GPU)
+#add_link_options( -cuda -lnvToolsExt)
+#set(execname_single advectiontest.gpu.${buildtype})
+##set(execname_fullset tladvectiontest.gpu)
+#else()
+#set(execname_single advectiontest.cpu.${buildtype})
+##set(execname_fullset tladvectiontest.cpu)
+#endif()
+#add_executable(${execname_single} "advection/src_testapps/advection_dwarf_test_minimal.f90")
+#add_dependencies(${execname_single} common_${buildtype} advection_${buildtype} )
+#set_property(TARGET ${exename_single} PROPERTY LINKER_LANGUAGE Fortran)
+#set_property(TARGET ${exename_single} PROPERTY LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${buildtype}/lib)
+
+
+set(buildtype uni)
+set(buildtypesp sp)
+set(buildtypedp dp)
 if(ENABLE_GPU)
 add_link_options( -cuda -lnvToolsExt)
-set(execname_single advectiontest.gpu)
+set(execname_single advectiontest.gpu.${buildtype})
 #set(execname_fullset tladvectiontest.gpu)
 else()
-set(execname_single advectiontest.cpu)
-set(execname_fullset tladvectiontest.cpu)
+set(execname_single advectiontest.cpu.${buildtype})
+#set(execname_fullset tladvectiontest.cpu)
 endif()
-add_executable(${execname_single} "advection/src_testapps/advection_dwarf_test_modular.f90")
-add_dependencies(${execname_single} common advection )
+add_executable(${execname_single} "advection/src_testapps/advection_dwarf_test_minimal.f90")
+add_dependencies(${execname_single} common_${buildtypesp} advection_${buildtypesp} )
+add_dependencies(${execname_single} common_${buildtypedp} advection_${buildtypedp} )
+target_link_libraries(${execname_single} ${MPI_Fortran_LIBRARIES} advection_interface_${buildtypesp} advection_interface_${buildtypedp} )
+target_link_libraries(${execname_single} advection_${buildtypesp} advection_${buildtypedp} )
+target_link_libraries(${execname_single} common_${buildtypesp} common_${buildtypedp} )
+target_include_directories(${execname_single} PRIVATE ${CMAKE_BINARY_DIR}/include) # ${solverdir} ${diffusiondir})
+set_target_properties(${execname_single} PROPERTIES Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
+  message(STATUS ${CMAKE_BINARY_DIR}/include)
 set_property(TARGET ${exename_single} PROPERTY LINKER_LANGUAGE Fortran)
+set_property(TARGET ${exename_single} PROPERTY LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${buildtype}/lib)

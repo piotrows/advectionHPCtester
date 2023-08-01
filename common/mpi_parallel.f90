@@ -87,7 +87,7 @@ CONTAINS
 
    SUBROUTINE geomset(lmpiinit)
    USE parameters, ONLY: isphere,ipoles
-      LOGICAL,OPTIONAL ::  lmpiinit
+      LOGICAL ::  lmpiinit
 !
 !     setup geometry information for each processor
 !
@@ -106,6 +106,7 @@ CONTAINS
       INTEGER coords(3),coordl(3)
       INTEGER ierr,ierr1,ierr1a,ierr2,ierr3,ierr4,rank
       ierr=0
+      CALL MPI_INITIALIZED(lmpiinit)
       IF(lmpiinit) THEN
         CALL MPI_Init(ierr)
 !************ Prepare copy of default communicator ************************

@@ -29,7 +29,7 @@ MODULE parameters
    REAL(KIND=euwp), PROTECTED :: cmpex ! r_d/pr00
    REAL(KIND=euwp), PROTECTED :: wexnr ! r_d/(cp_d-r_d) 
    REAL(KIND=euwp), PROTECTED :: epsi ! rv/r_d 
-   REAL(KIND=euwp), PROTECTED :: epsb ! rv=461.51; rv/r_d - 1 
+   REAL(KIND=euwp), PROTECTED :: epsb ! rv=461.51 rv/r_d - 1 
    REAL(KIND=euwp), PROTECTED ::    g
    REAL(KIND=euwp), PROTECTED ::   st 
    REAL(KIND=euwp), PROTECTED :: th00 
