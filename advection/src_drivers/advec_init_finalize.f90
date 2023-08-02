@@ -1,5 +1,4 @@
 MODULE advec_initialize
-   USE iso_c_binding
 #ifdef CUDACODE
    USE cudafor
 #endif
@@ -56,7 +55,7 @@ CONTAINS
 !   CALL set_default_dynamicmem_parameters
 #endif
 !  CALL read_commandline_parameters
-   print *,'Precision is',euwp,'bytes'
+   print *,'Init precision is',euwp,'bytes'
    itmin=1
    itmax=16
    itstr=1
@@ -134,6 +133,7 @@ USE scratch_datafields, ONLY: xtest
 USE testing, ONLY: test_solution_energy,test_solution_error
 INTEGER, INTENT(IN) :: itime_counter
 
+print *,'Exit precision is',euwp,'bytes'
 !#ifdef TESTING
 !   IF(itimecnt.ge.nstarttest) THEN
 !@cuf istat=cudaDeviceSynchronize()
