@@ -2,9 +2,7 @@ cmake_minimum_required (VERSION 3.14.0)
 project(advectionHPCtester Fortran )
 enable_language (Fortran)
 
-set(CMAKE_Fortran_FLAGS "-g -fvisibility=hidden")
-#execute_process(COMMAND bash  "${PROJECT_SOURCE_DIR}/advection/src_algorithms/prepgpu.sh" 
-#  	        WORKING_DIRECTORY  "${PROJECT_SOURCE_DIR}/advection/src_algorithms/" )
+set(CMAKE_Fortran_FLAGS "-g ")
 
 set(optsprecsp -DFLOAT_PRECISION=4) 
 set(optsprecdp -DFLOAT_PRECISION=8) 
@@ -147,9 +145,6 @@ set(advection_tst_sources_preprocess ${advection_tst_sources_preprocess}
 advection_test_setup.f90
 )
 
-
-
-
 function(DEFINE_PREPROCESS_SED subdir_arg destdir_arg files_arg custopt_arg)
 set(subdir ${subdir_arg})
 file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/${destdir_arg}/${subdir}") 
@@ -166,7 +161,7 @@ foreach( file_i ${files_arg})
         VERBATIM
 )
 endforeach( file_i )
-endfunction()
+endfunction(DEFINE_PROCESS_SED)
 
 function(GENERATE_BUILD buildtype_arg specopts_arg driverfile_arg) 
 set(buildtype ${buildtype_arg})
@@ -213,8 +208,8 @@ set_target_properties(   common_${buildtype} PROPERTIES Fortran_MODULE_DIRECTORY
 set_target_properties(   common_${buildtype} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${buildtype}/lib)
 set_target_properties(advection_${buildtype} PROPERTIES Fortran_MODULE_DIRECTORY ${advectiondir})
 set_target_properties(advection_${buildtype} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${buildtype}/lib)
-target_include_directories(common_${buildtype} PRIVATE ${commondir} ) # ${solverdir} ${diffusiondir})
-target_include_directories(advection_${buildtype} PRIVATE ${advectiondir}) # ${solverdir} ${diffusiondir})
+target_include_directories(common_${buildtype} PRIVATE ${commondir} ) 
+target_include_directories(advection_${buildtype} PRIVATE ${advectiondir}) 
 
 list(TRANSFORM driverfile PREPEND ${CMAKE_SOURCE_DIR}/advection/src_drivers/)
 add_library(advection_interface_${buildtype} SHARED ${driverfile})
@@ -225,7 +220,7 @@ file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
 set_target_properties(advection_interface_${buildtype} PROPERTIES Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
 set_target_properties(advection_interface_${buildtype} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
-endfunction()
+endfunction(GENERATE_BUILD)
 
 set(buildtype sp)
 set(driverfile 
@@ -236,18 +231,15 @@ generate_build(${buildtype} ${optsprecsp} ${driverfile})
 if(ENABLE_GPU)
 add_link_options( -cuda -lnvToolsExt)
 set(execname_single advectiontest.gpu.${buildtype})
-#set(execname_fullset tladvectiontest.gpu)
 else()
 set(execname_single advectiontest.cpu.${buildtype})
-#set(execname_fullset tladvectiontest.cpu)
 endif()
 add_executable(${execname_single} "advection/src_testapps/advection_dwarf_test_minimal_${buildtype}.f90")
 add_dependencies(${execname_single} common_${buildtype} advection_${buildtype} )
-target_link_libraries(advection_interface_${buildtype} PRIVATE advection_${buildtype})# common_${buildtype} )
+target_link_libraries(advection_interface_${buildtype} PRIVATE advection_${buildtype})
 target_link_libraries(${execname_single}  advection_interface_${buildtype})
-target_include_directories(${execname_single} PRIVATE ${CMAKE_BINARY_DIR}/include) # ${solverdir} ${diffusiondir})
+target_include_directories(${execname_single} PRIVATE ${CMAKE_BINARY_DIR}/include) 
 set_property(TARGET ${exename_single} PROPERTY LINKER_LANGUAGE Fortran)
-#set_property(TARGET ${exename_single} PROPERTY LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${buildtype}/lib)
 
 set(buildtype dp)
 set(driverfile 
@@ -266,7 +258,6 @@ target_link_libraries(advection_interface_${buildtype} PRIVATE  advection_${buil
 target_link_libraries(${execname_single}  advection_interface_${buildtype})
 target_include_directories(${execname_single} PRIVATE ${CMAKE_BINARY_DIR}/include) # ${solverdir} ${diffusiondir})
 set_property(TARGET ${exename_single} PROPERTY LINKER_LANGUAGE Fortran)
-#set_property(TARGET ${exename_single} PROPERTY LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${buildtype}/lib)
 
 
 set(buildtype uni)
