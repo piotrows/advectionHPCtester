@@ -153,7 +153,7 @@ set(destdir  "${destdir_arg}/${subdir}")
 foreach( file_i ${files_arg})
         message (STATUS "define preprocessing for file: ${destdir}/${file_i}")
         add_custom_command( 
-        COMMAND gcc-13 -E -P ${optsmpi} ${optsgpu} ${custopt_arg} -cpp  ${localdir}/${file_i}
+        COMMAND gcc-13 -E -P ${optsmpi} ${optsgpu} ${optstest} ${custopt_arg} -cpp  ${localdir}/${file_i}
         | sed -e "s/\&/\&\\n/g" -e "s/\;/\;\\n/g" -e "s/>>>/>>>\\n/g" -e "/^$/d" > "${destdir}/${file_i}.pp.f90"
         DEPENDS  ${localdir}/${file_i}
         OUTPUT  ${destdir}/${file_i}.pp.f90

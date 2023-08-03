@@ -134,13 +134,13 @@ USE testing, ONLY: test_solution_energy,test_solution_error
 INTEGER, INTENT(IN) :: itime_counter
 
 print *,'Exit precision is',euwp,'bytes'
-!#ifdef TESTING
-!   IF(itimecnt.ge.nstarttest) THEN
+#ifdef TESTING
+!  IF(itimecnt.ge.nstarttest) THEN
 !@cuf istat=cudaDeviceSynchronize()
       CALL test_solution_energy(xtracer,xtest,itime_counter,'a',np,mp,lp,ih)
       CALL test_solution_error(xtracer,xtest,itime_counter,'c',np,mp,lp,ih)
-!   ENDIF
-!#endif /*TESTING*/
+!  ENDIF
+#endif /*TESTING*/
 
 #ifdef CUDACODE
    CALL cudaProfilerStop();
