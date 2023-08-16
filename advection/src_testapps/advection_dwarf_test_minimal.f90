@@ -12,37 +12,158 @@
 !#define DWARF11
 !#define DWARF12
 PROGRAM advection_dwarf_cartesian_test
-   USE advec_interface_dp, ONLY: advec_dwarf_interface_dp
-   USE advec_interface_dp, ONLY:   allocate_interface_dp  
-   USE advec_interface_dp, ONLY: deallocate_interface_dp  
-   USE advec_interface_sp, ONLY: advec_dwarf_interface_sp
-   USE advec_interface_sp, ONLY:   allocate_interface_sp  
-   USE advec_interface_sp, ONLY: deallocate_interface_sp  
+!  USE advec_interface_dp, ONLY: advec_dwarf_interface_dp
+!  USE advec_interface_dp, ONLY:   allocate_interface_dp  
+!  USE advec_interface_dp, ONLY: deallocate_interface_dp  
+!  USE advec_interface_sp, ONLY: advec_dwarf_interface_sp
+!  USE advec_interface_sp, ONLY:   allocate_interface_sp  
+!  USE advec_interface_sp, ONLY: deallocate_interface_sp  
+   USE :: iso_c_binding
+   integer(c_int), parameter :: rtld_lazy=1 ! value extracte from the C header file
+    integer(c_int), parameter :: rtld_now=2 ! value extracte from the C header file
+    !
+    ! interface to linux API
+    interface
+        function dlopen(filename,mode) bind(c,name="dlopen")
+            ! void *dlopen(const char *filename, int mode);
+            use iso_c_binding
+            implicit none
+            type(c_ptr) :: dlopen
+            character(c_char), intent(in) :: filename(*)
+            integer(c_int), value :: mode
+        end function
+
+        function dlsym(handle,name) bind(c,name="dlsym")
+            ! void *dlsym(void *handle, const char *name);
+            use iso_c_binding
+            implicit none
+            type(c_funptr) :: dlsym
+            type(c_ptr), value :: handle
+            character(c_char), intent(in) :: name(*)
+        end function
+
+        function dlclose(handle) bind(c,name="dlclose")
+            ! int dlclose(void *handle);
+            use iso_c_binding
+            implicit none
+            integer(c_int) :: dlclose
+            type(c_ptr), value :: handle
+        end function
+    end interface
+
+    abstract interface
+        subroutine compute_proc (iopt, ialg, lupdate, lvsplit, ipoles, itimecnt) bind(c)
+            use, intrinsic :: iso_c_binding
+            integer(c_int), intent(in) ::iopt, ialg, ipoles, itimecnt 
+            logical(c_bool), intent(in) ::lupdate, lvsplit 
+        end subroutine compute_proc
+    end interface
+    abstract interface
+        subroutine allocate_proc (lmpiini, nprocx, nprocy, nprocz) bind(c)
+            use, intrinsic :: iso_c_binding
+            integer(c_int), intent(in) :: nprocx, nprocy, nprocz 
+            logical(c_bool), intent(in) ::lmpiini 
+        end subroutine allocate_proc
+    end interface
+    abstract interface
+        subroutine deallocate_proc (itimecnt) bind(c)
+            use, intrinsic :: iso_c_binding
+            integer(c_int), intent(in) :: itimecnt 
+        end subroutine deallocate_proc
+    end interface
+    type(c_funptr) :: allocate_addr
+    type(c_funptr) :: deallocate_addr
+    type(c_funptr) :: compute_addr
+    type(c_ptr)    :: libhandle
+    character(256) :: pName, lName
+    procedure(compute_proc), bind(c), pointer :: advec_dwarf_interface 
+    procedure(allocate_proc), bind(c), pointer :: allocate_interface 
+    procedure(deallocate_proc), bind(c), pointer :: deallocate_interface 
+
    INTEGER,DIMENSION(100) :: opttype_list,algtype_list,tformat_list 
    INTEGER,PARAMETER :: ipoles=0
    CHARACTER(LEN=22) :: pnetvar_list(100)
-   LOGICAL lupdatemulti,lvertsplit
-   INTEGER itimecnt,nt,itestcnt
+   LOGICAL(c_bool) :: linitmpi=.TRUE.
+   LOGICAL(c_bool) :: lupdatemulti=.FALSE.
+   LOGICAL(c_bool) :: lvertsplit=.FALSE.
+
+   INTEGER(c_int) itimecnt,nt,itestcnt
    CALL define_list_of_tests
    nt=((556+0))
    itestcnt=1
-   CALL allocate_interface_dp(.TRUE.,1,1,1)
+   libhandle=dlopen("./lib/libadvection_interface_dp.dylib"//c_null_char, RTLD_LAZY)
+    if (.not. c_associated(libhandle))then
+        print*, 'Unable to load DLL ./lib/libadvection_interface_dp.dylib'
+        stop
+    end if 
+    compute_addr=dlsym(libhandle, "advec_dwarf_interface_dp"//c_null_char)
+    if (.not. c_associated(compute_addr))then
+        write(*,*) 'Unable to load the procedure advec_dwarf_interface_dp'
+        stop
+    end if
+    call c_f_procpointer( compute_addr, advec_dwarf_interface )
+    allocate_addr=dlsym(libhandle, "allocate_interface_dp"//c_null_char)
+    if (.not. c_associated(allocate_addr))then
+        write(*,*) 'Unable to load the procedure allocate_interface_dp'
+        stop
+    end if
+    call c_f_procpointer( allocate_addr, allocate_interface )
+    deallocate_addr=dlsym(libhandle, "deallocate_interface_dp"//c_null_char)
+    if (.not. c_associated(deallocate_addr))then
+        write(*,*) 'Unable to load the procedure deallocate_interface_dp'
+        stop
+    end if
+    call c_f_procpointer( deallocate_addr, deallocate_interface )
+
+   CALL allocate_interface(linitmpi,1,1,1)
    DO itimecnt=1,nt
-     CALL advec_dwarf_interface_dp(opttype_list(itestcnt), &
+     CALL advec_dwarf_interface(opttype_list(itestcnt), &
                                 algtype_list(itestcnt), &
                                 lupdatemulti,lvertsplit, ipoles, &
                                 itimecnt )                    
    ENDDO
-   CALL deallocate_interface_dp(itimecnt)    
+   CALL deallocate_interface(itimecnt)    
    itestcnt=1
-   CALL allocate_interface_sp(.FALSE.,1,1,1)
+   libhandle=dlopen("./lib/libadvection_interface_sp.dylib"//c_null_char, RTLD_LAZY)
+    if (.not. c_associated(libhandle))then
+        print*, 'Unable to load DLL ./lib/libadvection_interface_sp.dylib'
+        stop
+    end if 
+    compute_addr=dlsym(libhandle, "advec_dwarf_interface_sp"//c_null_char)
+    if (.not. c_associated(compute_addr))then
+        write(*,*) 'Unable to load the procedure advec_dwarf_interface_sp'
+        stop
+    end if
+    call c_f_procpointer( compute_addr, advec_dwarf_interface )
+    allocate_addr=dlsym(libhandle, "allocate_interface_sp"//c_null_char)
+    if (.not. c_associated(allocate_addr))then
+        write(*,*) 'Unable to load the procedure allocate_interface_sp'
+        stop
+    end if
+    call c_f_procpointer( allocate_addr, allocate_interface )
+    deallocate_addr=dlsym(libhandle, "deallocate_interface_sp"//c_null_char)
+    if (.not. c_associated(deallocate_addr))then
+        write(*,*) 'Unable to load the procedure deallocate_interface_sp'
+        stop
+    end if
+    call c_f_procpointer( deallocate_addr, deallocate_interface )
+   CALL allocate_interface(linitmpi,1,1,1)
    DO itimecnt=1,nt
-     CALL advec_dwarf_interface_sp(opttype_list(itestcnt), &
+     CALL advec_dwarf_interface(opttype_list(itestcnt), &
                                 algtype_list(itestcnt), &
-                                lupdatemulti,lvertsplit, ipoles, &                    
+                                lupdatemulti,lvertsplit, ipoles, &
                                 itimecnt )                    
    ENDDO
-   CALL deallocate_interface_sp(itimecnt)    
+   CALL deallocate_interface(itimecnt)    
+!  itestcnt=1
+!  CALL allocate_interface_sp(.FALSE.,1,1,1)
+!  DO itimecnt=1,nt
+!    CALL advec_dwarf_interface_sp(opttype_list(itestcnt), &
+!                               algtype_list(itestcnt), &
+!                               lupdatemulti,lvertsplit, ipoles, &                    
+!                               itimecnt )                    
+!  ENDDO
+!  CALL deallocate_interface_sp(itimecnt)    
 CONTAINS
  SUBROUTINE define_list_of_tests()
    INTEGER maxtestcnt

@@ -3,6 +3,7 @@ project(advectionHPCtester Fortran )
 enable_language (Fortran)
 
 set(CMAKE_Fortran_FLAGS "-g ")
+#set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(optsprecsp -DFLOAT_PRECISION=4) 
 set(optsprecdp -DFLOAT_PRECISION=8) 
@@ -70,7 +71,7 @@ if(ENABLE_FAST)
 
 	#  message(STATUS ${CMAKE_Fortran_COMPILER_ID})
   if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
-    set(optims  -Ofast -cpp )
+    set(optims  -Ofast -cpp -g -fbacktrace )
   endif()
   if(CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
     set(optims  -O3 -xHost -unroll-aggressive -qopt-prefetch -align commons )
@@ -82,8 +83,8 @@ if(ENABLE_FAST)
 else()
 
   if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
-       set(optims  -ffree-form -fimplicit-none ) #-cpp  )
-       set(debugs  -g -fbounds-check -fbacktrace -ffpe-trap=invalid,zero,overflow  -finit-real=snan  )
+       set(optims  "-ffree-form -fimplicit-none -cpp"  )
+       set(debugs  "-g -fbounds-check -fbacktrace -ffpe-trap=invalid,zero,overflow  -finit-real=snan"  )
   endif()
   if(CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
        set(optims  -O1 )
@@ -270,11 +271,11 @@ else()
 set(execname_single advectiontest.cpu.${buildtype})
 endif()
 add_executable(${execname_single} "advection/src_testapps/advection_dwarf_test_minimal.f90")
-add_dependencies(${execname_single} advection_interface_${buildtypesp} 
-                                    advection_interface_${buildtypedp}  )
+add_dependencies(${execname_single} advection_interface_${buildtypedp} 
+                                    advection_interface_${buildtypesp}  )
 target_link_libraries(${execname_single} PRIVATE ${MPI_Fortran_LIBRARIES}
-                                    advection_interface_${buildtypesp} 
-                                    advection_interface_${buildtypedp} )
+                                    advection_interface_${buildtypedp}  
+                                    advection_interface_${buildtypesp} ) 
 set_target_properties(${execname_single} PROPERTIES Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
 set_property(TARGET ${exename_single} PROPERTY LINKER_LANGUAGE Fortran)
 set_property(TARGET ${exename_single} PROPERTY LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${buildtype}/lib)

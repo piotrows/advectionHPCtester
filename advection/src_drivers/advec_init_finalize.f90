@@ -1,4 +1,5 @@
 MODULE advec_initialize
+   USE, INTRINSIC :: iso_c_binding
 #ifdef CUDACODE
    USE cudafor
 #endif
