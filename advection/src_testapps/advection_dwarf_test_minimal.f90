@@ -19,6 +19,7 @@ PROGRAM advection_dwarf_cartesian_test
 !  USE advec_interface_sp, ONLY:   allocate_interface_sp  
 !  USE advec_interface_sp, ONLY: deallocate_interface_sp  
    USE :: iso_c_binding
+   integer(c_int), parameter :: rtld_local=0 ! value extracte from the C header file
    integer(c_int), parameter :: rtld_lazy=1 ! value extracte from the C header file
     integer(c_int), parameter :: rtld_now=2 ! value extracte from the C header file
     !
@@ -87,13 +88,13 @@ PROGRAM advection_dwarf_cartesian_test
    LOGICAL(c_bool) :: lupdatemulti=.FALSE.
    LOGICAL(c_bool) :: lvertsplit=.FALSE.
 
-   INTEGER(c_int) itimecnt,nt,itestcnt
+   INTEGER(c_int) itimecnt,nt,itestcnt,ierr
    CALL define_list_of_tests
    nt=((556+0))
    itestcnt=1
-   libhandle=dlopen("./lib/libadvection_interface_dp.dylib"//c_null_char, RTLD_LAZY)
+   libhandle=dlopen("./lib/libadvection_interface_dp.so"//c_null_char, RTLD_LOCAL)
     if (.not. c_associated(libhandle))then
-        print*, 'Unable to load DLL ./lib/libadvection_interface_dp.dylib'
+        print*, 'Unable to load DLL ./lib/libadvection_interface_dp.so'
         stop
     end if 
     compute_addr=dlsym(libhandle, "advec_dwarf_interface_dp"//c_null_char)
@@ -122,11 +123,12 @@ PROGRAM advection_dwarf_cartesian_test
                                 lupdatemulti,lvertsplit, ipoles, &
                                 itimecnt )                    
    ENDDO
-   CALL deallocate_interface(itimecnt)    
+   CALL  deallocate_interface(itimecnt)    
+   ierr=dlclose(libhandle)
    itestcnt=1
-   libhandle=dlopen("./lib/libadvection_interface_sp.dylib"//c_null_char, RTLD_LAZY)
+   libhandle=dlopen("./lib/libadvection_interface_sp.so"//c_null_char, RTLD_LOCAL)
     if (.not. c_associated(libhandle))then
-        print*, 'Unable to load DLL ./lib/libadvection_interface_sp.dylib'
+        print*, 'Unable to load DLL ./lib/libadvection_interface_sp.so'
         stop
     end if 
     compute_addr=dlsym(libhandle, "advec_dwarf_interface_sp"//c_null_char)

@@ -3,7 +3,7 @@ project(advectionHPCtester Fortran )
 enable_language (Fortran)
 
 set(CMAKE_Fortran_FLAGS "-g ")
-#set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(optsprecsp -DFLOAT_PRECISION=4) 
 set(optsprecdp -DFLOAT_PRECISION=8) 
@@ -74,7 +74,7 @@ if(ENABLE_FAST)
     set(optims  -Ofast -cpp -g -fbacktrace )
   endif()
   if(CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
-    set(optims  -O3 -xHost -unroll-aggressive -qopt-prefetch -align commons )
+    set(optims -fpp  -O3 -xHost -unroll-aggressive -qopt-prefetch -align commons )
   endif()
   if(CMAKE_Fortran_COMPILER_ID MATCHES "NVHPC" OR CMAKE_Fortran_COMPILER_ID MATCHES "PGI")
     set(optims  -O2 -Mpreprocess )
@@ -87,7 +87,7 @@ else()
        set(debugs  "-g -fbounds-check -fbacktrace -ffpe-trap=invalid,zero,overflow  -finit-real=snan"  )
   endif()
   if(CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
-       set(optims  -O1 )
+       set(optims  -O1 -fpp)
        set(debugs  -g -traceback -check bounds -ftrapuv -init=snan -implicitnone -fpe0 -ftz )
   endif()
   if(CMAKE_Fortran_COMPILER_ID MATCHES "NVHPC" OR CMAKE_Fortran_COMPILER_ID MATCHES "PGI")
@@ -154,7 +154,7 @@ set(destdir  "${destdir_arg}/${subdir}")
 foreach( file_i ${files_arg})
         message (STATUS "define preprocessing for file: ${destdir}/${file_i}")
         add_custom_command( 
-        COMMAND gcc-13 -E -P ${optsmpi} ${optsgpu} ${optstest} ${custopt_arg} -cpp  ${localdir}/${file_i}
+        COMMAND gcc -E -P ${optsmpi} ${optsgpu} ${optstest} ${custopt_arg} -cpp  ${localdir}/${file_i}
         | sed -e "s/\&/\&\\n/g" -e "s/\;/\;\\n/g" -e "s/>>>/>>>\\n/g" -e "/^$/d" > "${destdir}/${file_i}.pp.f90"
         DEPENDS  ${localdir}/${file_i}
         OUTPUT  ${destdir}/${file_i}.pp.f90
@@ -229,6 +229,7 @@ set(driverfile
     advec_init_interface_${buildtype}.f90
     )
 generate_build(${buildtype} ${optsprecsp} ${driverfile}) 
+add_link_options( -ldl)
 if(ENABLE_GPU)
 add_link_options( -cuda -lnvToolsExt)
 set(execname_single advectiontest.gpu.${buildtype})
