@@ -19,9 +19,14 @@ PROGRAM advection_dwarf_cartesian_test
 !  USE advec_interface_sp, ONLY:   allocate_interface_sp  
 !  USE advec_interface_sp, ONLY: deallocate_interface_sp  
    USE :: iso_c_binding
+   IMPLICIT NONE
+#define LM_ID_BASE 0 /* Initial namespace. */
+#define LM_ID_NEWLM -1 /*  For dlmopen: request new namespace */
+   integer(c_long) :: dlist = LM_ID_NEWLM 
    integer(c_int), parameter :: rtld_local=0 ! value extracte from the C header file
    integer(c_int), parameter :: rtld_lazy=1 ! value extracte from the C header file
-    integer(c_int), parameter :: rtld_now=2 ! value extracte from the C header file
+   integer(c_int), parameter :: rtld_now=2 ! value extracte from the C header file
+   
     !
     ! interface to linux API
     interface
@@ -30,6 +35,16 @@ PROGRAM advection_dwarf_cartesian_test
             use iso_c_binding
             implicit none
             type(c_ptr) :: dlopen
+            character(c_char), intent(in) :: filename(*)
+            integer(c_int), value :: mode
+        end function
+
+        function dlmopen(lmid_t,filename,mode) bind(c,name="dlmopen")
+            ! void *dlmopen(Lmid_t lmid, const char *filename, int mode);
+            use iso_c_binding
+            implicit none
+            type(c_ptr) :: dlmopen
+            integer(c_long), value :: lmid_t 
             character(c_char), intent(in) :: filename(*)
             integer(c_int), value :: mode
         end function
@@ -92,7 +107,7 @@ PROGRAM advection_dwarf_cartesian_test
    CALL define_list_of_tests
    nt=((556+0))
    itestcnt=1
-   libhandle=dlopen("./lib/libadvection_interface_dp.so"//c_null_char, RTLD_LOCAL)
+   libhandle=dlmopen(dlist,"./lib/libadvection_interface_dp.so"//c_null_char, RTLD_LAZY)
     if (.not. c_associated(libhandle))then
         print*, 'Unable to load DLL ./lib/libadvection_interface_dp.so'
         stop
@@ -126,7 +141,7 @@ PROGRAM advection_dwarf_cartesian_test
    CALL  deallocate_interface(itimecnt)    
    ierr=dlclose(libhandle)
    itestcnt=1
-   libhandle=dlopen("./lib/libadvection_interface_sp.so"//c_null_char, RTLD_LOCAL)
+   libhandle=dlmopen(dlist,"./lib/libadvection_interface_sp.so"//c_null_char, RTLD_LAZY)
     if (.not. c_associated(libhandle))then
         print*, 'Unable to load DLL ./lib/libadvection_interface_sp.so'
         stop
