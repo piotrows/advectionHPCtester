@@ -133,6 +133,7 @@ USE precisions
 USE scratch_datafields, ONLY: xtest
 USE testing, ONLY: test_solution_energy,test_solution_error
 INTEGER, INTENT(IN) :: itime_counter
+INTEGER :: istat
 
 print *,'Exit precision is',euwp,'bytes'
 #ifdef TESTING

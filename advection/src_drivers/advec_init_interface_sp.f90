@@ -1,6 +1,6 @@
 MODULE advec_init_interface_sp
+   USE advec_initialize
    IMPLICIT NONE
-
 CONTAINS
    SUBROUTINE allocate_interface_sp(linitmpi, nprocx, nprocy, nprocz)
    USE precisions
