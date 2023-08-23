@@ -1,7 +1,7 @@
 !#define DWARF0
 !#define DWARF1
 !#define DWARF2
-#define DWARF3
+!define DWARF3
 !#define DWARF4
 !#define DWARF5
 !#define DWARF6
@@ -10,14 +10,17 @@
 !#define DWARF9
 !#define DWARF10
 !#define DWARF11
-!#define DWARF12
+#define DWARF12
 PROGRAM advection_dwarf_cartesian_test
-!  USE advec_interface_dp, ONLY: advec_dwarf_interface_dp
-!  USE advec_interface_dp, ONLY:   allocate_interface_dp  
-!  USE advec_interface_dp, ONLY: deallocate_interface_dp  
-!  USE advec_interface_sp, ONLY: advec_dwarf_interface_sp
-!  USE advec_interface_sp, ONLY:   allocate_interface_sp  
-!  USE advec_interface_sp, ONLY: deallocate_interface_sp  
+  USE advec_interface_dpgpu, ONLY: advec_dwarf_interface_dpgpu
+  USE advec_interface_dpgpu, ONLY:   allocate_interface_dpgpu  
+  USE advec_interface_dpgpu, ONLY: deallocate_interface_dpgpu  
+  USE advec_interface_spgpu, ONLY: advec_dwarf_interface_spgpu
+  USE advec_interface_spgpu, ONLY:   allocate_interface_spgpu  
+  USE advec_interface_spgpu, ONLY: deallocate_interface_spgpu  
+#ifdef CUDACODE
+   USE cudafor
+#endif 
    USE :: iso_c_binding
    IMPLICIT NONE
 #define LM_ID_BASE 0 /* Initial namespace. */
@@ -57,6 +60,16 @@ PROGRAM advection_dwarf_cartesian_test
             type(c_ptr), value :: handle
             character(c_char), intent(in) :: name(*)
         end function
+        function strlen(str) result(isize) bind(C, name='strlen')
+             import
+             type(c_ptr),value :: str
+             integer(c_int) :: isize
+         end function strlen   
+
+        function dlerror() result(error) bind(C, name='dlerror')
+            import
+            type(c_ptr) :: error
+        end function dlerror
 
         function dlclose(handle) bind(c,name="dlclose")
             ! int dlclose(void *handle);
@@ -102,6 +115,9 @@ PROGRAM advection_dwarf_cartesian_test
    LOGICAL(c_bool) :: linitmpi=.TRUE.
    LOGICAL(c_bool) :: lupdatemulti=.FALSE.
    LOGICAL(c_bool) :: lvertsplit=.FALSE.
+   LOGICAL :: lfinitmpi=.TRUE.
+   LOGICAL :: lfupdatemulti=.FALSE.
+   LOGICAL :: lfvertsplit=.FALSE.
 
    INTEGER(c_int) itimecnt,nt,itestcnt,ierr
    CALL define_list_of_tests
@@ -140,6 +156,7 @@ PROGRAM advection_dwarf_cartesian_test
    ENDDO
    CALL  deallocate_interface(itimecnt)    
    ierr=dlclose(libhandle)
+   IF(ierr.ne.0) print *,geterror()
    itestcnt=1
    libhandle=dlmopen(dlist,"./lib/libadvection_interface_sp.so"//c_null_char, RTLD_LAZY)
     if (.not. c_associated(libhandle))then
@@ -172,6 +189,49 @@ PROGRAM advection_dwarf_cartesian_test
                                 itimecnt )                    
    ENDDO
    CALL deallocate_interface(itimecnt)    
+   ierr=dlclose(libhandle)
+   IF(ierr.ne.0) print *,geterror()
+   itestcnt=1
+!  libhandle=dlmopen(dlist,"./lib/libadvection_interface_spgpu.so"//c_null_char, RTLD_LAZY)
+!   if (.not. c_associated(libhandle))then
+!       print*, 'Unable to load DLL ./lib/libadvection_interface_spgpu.so'
+!       stop
+!   end if 
+!   compute_addr=dlsym(libhandle, "advec_dwarf_interface_spgpu"//c_null_char)
+!   if (.not. c_associated(compute_addr))then
+!       write(*,*) 'Unable to load the procedure advec_dwarf_interface_spgpu'
+!       stop
+!   end if
+!   call c_f_procpointer( compute_addr, advec_dwarf_interface )
+!   allocate_addr=dlsym(libhandle, "allocate_interface_spgpu"//c_null_char)
+!   if (.not. c_associated(allocate_addr))then
+!       write(*,*) 'Unable to load the procedure allocate_interface_spgpu'
+!       stop
+!   end if
+!   call c_f_procpointer( allocate_addr, allocate_interface )
+!   deallocate_addr=dlsym(libhandle, "deallocate_interface_sp"//c_null_char)
+!   if (.not. c_associated(deallocate_addr))then
+!       write(*,*) 'Unable to load the procedure deallocate_interface_spgpu'
+!       stop
+!   end if
+!   call c_f_procpointer( deallocate_addr, deallocate_interface )
+   CALL allocate_interface_spgpu(lfinitmpi,1,1,1)
+!  DO itimecnt=1,nt
+!    CALL advec_dwarf_interface_spgpu(opttype_list(itestcnt), &
+!                               algtype_list(itestcnt), &
+!                               lfupdatemulti,lfvertsplit, ipoles, &
+!                               itimecnt )                    
+!  ENDDO
+   CALL deallocate_interface_spgpu(itimecnt)    
+   CALL allocate_interface_dpgpu(lfinitmpi,1,1,1)
+!  DO itimecnt=1,nt
+!    CALL advec_dwarf_interface_dpgpu(opttype_list(itestcnt), &
+!                               algtype_list(itestcnt), &
+!                               lfupdatemulti,lfvertsplit, ipoles, &
+!                               itimecnt )                    
+!  ENDDO
+   CALL deallocate_interface_dpgpu(itimecnt)    
+
 !  itestcnt=1
 !  CALL allocate_interface_sp(.FALSE.,1,1,1)
 !  DO itimecnt=1,nt
@@ -182,6 +242,32 @@ PROGRAM advection_dwarf_cartesian_test
 !  ENDDO
 !  CALL deallocate_interface_sp(itimecnt)    
 CONTAINS
+ function GetError() result(error_message)
+   
+   implicit none
+ 
+   character(len=:),allocatable :: error_message
+     
+   type(c_ptr) :: cstr
+   integer(c_int) :: ilength
+         
+   cstr = dlerror()
+   
+   if (c_associated(cstr)) then
+   
+     ilength = strlen(cstr) 
+     
+     block
+       character(kind=c_char,len=ilength), pointer :: f_str
+       call c_f_pointer(cptr=cstr, fptr=f_str)
+       error_message = f_str
+     end block
+     
+   else
+     error_message = ''
+   end if  
+ 
+ end function GetError
  SUBROUTINE define_list_of_tests()
    INTEGER maxtestcnt
    maxtestcnt=0

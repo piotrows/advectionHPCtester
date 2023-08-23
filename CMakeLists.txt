@@ -61,7 +61,7 @@ else()
  set(optstest "")
 endif()
 
-option(ENABLE_FAST "Optimize - ON, Debug - OFF"  OFF)
+option(ENABLE_FAST "Optimize - ON, Debug - OFF"  ON)
 
 if(ENABLE_FAST)
 
@@ -232,7 +232,11 @@ target_include_directories(common_${buildtype} PRIVATE ${commondir} )
 target_include_directories(advection_${buildtype} PRIVATE ${advectiondir}) 
 
 list(TRANSFORM driverfile PREPEND ${CMAKE_SOURCE_DIR}/advection/src_drivers/)
-add_library(advection_interface_${buildtype} SHARED ${driverfile})
+if(ongpu)
+	add_library(advection_interface_${buildtype} STATIC ${driverfile})
+else()
+	add_library(advection_interface_${buildtype} SHARED ${driverfile})
+endif()
 add_dependencies(advection_interface_${buildtype}  advection_${buildtype} )
 target_include_directories(advection_interface_${buildtype} PRIVATE ${commondir} ) 
 target_include_directories(advection_interface_${buildtype} PRIVATE ${advectiondir}) 
@@ -240,9 +244,11 @@ file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
 set_target_properties(advection_interface_${buildtype} PROPERTIES Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
 set_target_properties(advection_interface_${buildtype} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 if(ongpu)
-	target_compile_options(             common_${buildtype} PRIVATE -cuda) 
-	target_compile_options(          advection_${buildtype} PRIVATE -cuda) 
-	target_compile_options(advection_interface_${buildtype} PRIVATE -cuda) 
+	target_compile_options(             common_${buildtype} PRIVATE -cuda -gpu=nordc) 
+	target_compile_options(          advection_${buildtype} PRIVATE -cuda -gpu=nordc) 
+	target_compile_options(advection_interface_${buildtype} PRIVATE -cuda -gpu=nordc) 
+	#	target_link_options(advection_${buildtype} PUBLIC -Xcompiler -fvisibility=hidden ) 
+	#	target_link_options(common_${buildtype} PUBLIC -Xcompiler -fvisibility=hidden ) 
 endif()
 
 endfunction(GENERATE_BUILD)
@@ -332,22 +338,27 @@ target_include_directories(${execname_single} PRIVATE ${CMAKE_BINARY_DIR}/includ
 set_property(TARGET ${exename_single} PROPERTY LINKER_LANGUAGE Fortran)
 
 
-#set(buildtype uni)
-#set(buildtypesp sp)
-#set(buildtypedp dp)
-#if(ENABLE_GPU)
-##add_link_options( -cuda -lnvToolsExt)
-#set(execname_single advectiontest.gpu.${buildtype})
-#else()
-#set(execname_single advectiontest.cpu.${buildtype})
-#endif()
-#add_executable(${execname_single} "advection/src_testapps/advection_dwarf_test_minimal.f90")
-#add_dependencies(${execname_single} advection_interface_${buildtypedp} 
-#                                    advection_interface_${buildtypesp}  )
-#target_link_options(${execname_single} PRIVATE -cuda -lnvToolsExt)
-#target_link_libraries(${execname_single} PRIVATE ${MPI_Fortran_LIBRARIES}
-#                                    advection_interface_${buildtypedp}  
-#                                    advection_interface_${buildtypesp} ) 
-#set_target_properties(${execname_single} PROPERTIES Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
-#set_property(TARGET ${exename_single} PROPERTY LINKER_LANGUAGE Fortran)
-#set_property(TARGET ${exename_single} PROPERTY LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${buildtype}/lib)
+set(buildtype uni)
+set(buildtypesp sp)
+set(buildtypedp dp)
+set(buildtypespgpu spgpu)
+set(buildtypedpgpu dpgpu)
+set(execname_single advectiontest.uni)
+add_executable(${execname_single} "advection/src_testapps/advection_dwarf_test_minimal.f90")
+add_dependencies(${execname_single} advection_interface_${buildtypedp} 
+                                    advection_interface_${buildtypesp}   
+                                    advection_interface_${buildtypedpgpu}   
+                                    advection_interface_${buildtypespgpu}  )
+target_link_options(${execname_single} PUBLIC  -lnvToolsExt -cuda )
+target_link_libraries(${execname_single} PRIVATE ${MPI_Fortran_LIBRARIES}
+                                    advection_interface_${buildtypedp}  
+                                    advection_interface_${buildtypesp}
+                                    advection_interface_${buildtypedpgpu}  
+                                    advection_interface_${buildtypespgpu}
+                                    )
+if(ENABLE_GPU)
+	target_compile_options(${execname_single} PRIVATE -cuda -gpu=nordc) 
+endif()
+set_target_properties(${execname_single} PROPERTIES Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
+set_property(TARGET ${exename_single} PROPERTY LINKER_LANGUAGE Fortran)
+set_property(TARGET ${exename_single} PROPERTY LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${buildtype}/lib)

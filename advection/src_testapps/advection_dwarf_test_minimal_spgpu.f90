@@ -1,7 +1,7 @@
 !#define DWARF0
 !#define DWARF1
 !#define DWARF2
-#define DWARF3
+!#define DWARF3
 !#define DWARF4
 !#define DWARF5
 !#define DWARF6
@@ -10,8 +10,8 @@
 !#define DWARF9
 !#define DWARF10
 !#define DWARF11
-!#define DWARF12
-PROGRAM advection_dwarf_cartesian_test
+#define DWARF12
+PROGRAM advection_dwarf_cartesian_test 
    USE advec_interface_spgpu, ONLY: advec_dwarf_interface_spgpu
    USE advec_interface_spgpu, ONLY:   allocate_interface_spgpu  
    USE advec_interface_spgpu, ONLY: deallocate_interface_spgpu  
@@ -23,6 +23,9 @@ PROGRAM advection_dwarf_cartesian_test
    CALL define_list_of_tests
    nt=((556+0))
    itestcnt=1
+   lupdatemulti=.FALSE.
+   lvertsplit=.FALSE.
+
    CALL allocate_interface_spgpu(.TRUE.,1,1,1)
    DO itimecnt=1,nt
      CALL advec_dwarf_interface_spgpu(opttype_list(itestcnt), &
