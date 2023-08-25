@@ -19,12 +19,18 @@ PROGRAM advection_dwarf_cartesian_test
    INTEGER,PARAMETER :: ipoles=0
    CHARACTER(LEN=22) :: pnetvar_list(100)
    LOGICAL lupdatemulti,lvertsplit
+   LOGICAL :: linitmpi=.TRUE.
    INTEGER itimecnt,nt,itestcnt
+   INTEGER  :: nprocx=1 
+   INTEGER  :: nprocy=1 
+   INTEGER  :: nprocz=1 
+
    CALL define_list_of_tests
    nt=((556+0))
    itestcnt=1
    lupdatemulti=.FALSE.
    lvertsplit=.FALSE.
+
 
    CALL allocate_interface_spgpu(.TRUE.,1,1,1)
    DO itimecnt=1,nt
