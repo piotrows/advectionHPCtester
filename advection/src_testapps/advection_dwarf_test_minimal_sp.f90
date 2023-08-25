@@ -32,7 +32,7 @@ PROGRAM advection_dwarf_cartesian_test
    lvertsplit=.FALSE.
 
 
-   CALL allocate_interface_sp(.TRUE.,1,1,1)
+   CALL allocate_interface_sp(linitmpi,nprocx,nprocy,nprocz)
    DO itimecnt=1,nt
      CALL advec_dwarf_interface_sp(opttype_list(itestcnt), &
                                 algtype_list(itestcnt), &
