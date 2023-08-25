@@ -5,9 +5,9 @@ MODULE advec_init_interface_sp
 CONTAINS
    SUBROUTINE allocate_interface_sp(linitmpi, nprocx, nprocy, nprocz)
    USE precisions
-   LOGICA(c_bool)L, INTENT(IN) :: linitmpi
+   LOGICAL(c_bool), INTENT(IN) :: linitmpi
    LOGICAL :: lfinitmpi
-   INTEGER(c_int)R, INTENT(IN) :: nprocx, nprocy, nprocz 
+   INTEGER(c_int), INTENT(IN) :: nprocx, nprocy, nprocz 
    INTEGER :: nfprocx, nfprocy, nfprocz 
    lfinitmpi=linitmpi
    nfprocx=nprocx
