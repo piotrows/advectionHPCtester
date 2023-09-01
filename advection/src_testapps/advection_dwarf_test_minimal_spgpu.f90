@@ -1,7 +1,7 @@
 !#define DWARF0
 !#define DWARF1
 !#define DWARF2
-!#define DWARF3
+#define DWARF3
 !#define DWARF4
 !#define DWARF5
 !#define DWARF6
@@ -10,17 +10,21 @@
 !#define DWARF9
 !#define DWARF10
 !#define DWARF11
-#define DWARF12
+!#define DWARF12
 PROGRAM advection_dwarf_cartesian_test 
+#ifdef CUDACODE
+   USE cudafor
+#endif
    USE advec_interface_spgpu, ONLY: advec_dwarf_interface_spgpu
    USE advec_interface_spgpu, ONLY:   allocate_interface_spgpu  
    USE advec_interface_spgpu, ONLY: deallocate_interface_spgpu  
+   IMPLICIT NONE
    INTEGER,DIMENSION(100) :: opttype_list,algtype_list,tformat_list 
    INTEGER,PARAMETER :: ipoles=0
    CHARACTER(LEN=22) :: pnetvar_list(100)
    LOGICAL lupdatemulti,lvertsplit
    LOGICAL :: linitmpi=.TRUE.
-   INTEGER itimecnt,nt,itestcnt
+   INTEGER itimecnt,nt,itestcnt,istat
    INTEGER  :: nprocx=1 
    INTEGER  :: nprocy=1 
    INTEGER  :: nprocz=1 
@@ -33,12 +37,14 @@ PROGRAM advection_dwarf_cartesian_test
 
 
    CALL allocate_interface_spgpu(.TRUE.,1,1,1)
+!@cuf istat=cudaDeviceSynchronize()
    DO itimecnt=1,nt
      CALL advec_dwarf_interface_spgpu(opttype_list(itestcnt), &
                                 algtype_list(itestcnt), &
                                 lupdatemulti,lvertsplit, ipoles, &                    
                                 itimecnt )                    
    ENDDO
+!@cuf istat=cudaDeviceSynchronize()
    CALL deallocate_interface_spgpu(itimecnt)    
 CONTAINS
  SUBROUTINE define_list_of_tests()

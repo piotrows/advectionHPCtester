@@ -12,15 +12,19 @@
 !#define DWARF11
 !#define DWARF12
 PROGRAM advection_dwarf_cartesian_test
+#ifdef CUDACODE
+   USE cudafor
+#endif
    USE advec_interface_dpgpu, ONLY: advec_dwarf_interface_dpgpu
    USE advec_interface_dpgpu, ONLY:   allocate_interface_dpgpu  
    USE advec_interface_dpgpu, ONLY: deallocate_interface_dpgpu  
+   IMPLICIT NONE
    INTEGER,DIMENSION(100) :: opttype_list,algtype_list,tformat_list 
    INTEGER,PARAMETER :: ipoles=0
    CHARACTER(LEN=22) :: pnetvar_list(100)
    LOGICAL lupdatemulti,lvertsplit
    LOGICAL :: linitmpi=.TRUE.
-   INTEGER itimecnt,nt,itestcnt
+   INTEGER itimecnt,nt,itestcnt,istat
    INTEGER  :: nprocx=1 
    INTEGER  :: nprocy=1 
    INTEGER  :: nprocz=1 
@@ -29,12 +33,14 @@ PROGRAM advection_dwarf_cartesian_test
    nt=((556+0))
    itestcnt=1
    CALL allocate_interface_dpgpu(linitmpi,nprocx,nprocy,nprocz)
+!@cuf istat=cudaDeviceSynchronize()
    DO itimecnt=1,nt
      CALL advec_dwarf_interface_dpgpu(opttype_list(itestcnt), &
                                 algtype_list(itestcnt), &
                                 lupdatemulti,lvertsplit, ipoles, &
                                 itimecnt )                    
    ENDDO
+!@cuf istat=cudaDeviceSynchronize()
    CALL deallocate_interface_dpgpu(itimecnt)    
 CONTAINS
  SUBROUTINE define_list_of_tests()

@@ -1,7 +1,7 @@
 !#define DWARF0
 !#define DWARF1
 !#define DWARF2
-!define DWARF3
+#define DWARF3
 !#define DWARF4
 !#define DWARF5
 !#define DWARF6
@@ -10,14 +10,14 @@
 !#define DWARF9
 !#define DWARF10
 !#define DWARF11
-#define DWARF12
+!#define DWARF12
 PROGRAM advection_dwarf_cartesian_test
-  USE advec_interface_dpgpu, ONLY: advec_dwarf_interface_dpgpu
-  USE advec_interface_dpgpu, ONLY:   allocate_interface_dpgpu  
-  USE advec_interface_dpgpu, ONLY: deallocate_interface_dpgpu  
-  USE advec_interface_spgpu, ONLY: advec_dwarf_interface_spgpu
-  USE advec_interface_spgpu, ONLY:   allocate_interface_spgpu  
-  USE advec_interface_spgpu, ONLY: deallocate_interface_spgpu  
+ USE advec_interface_dpgpu, ONLY: advec_dwarf_interface_dpgpu
+ USE advec_interface_dpgpu, ONLY:   allocate_interface_dpgpu  
+ USE advec_interface_dpgpu, ONLY: deallocate_interface_dpgpu  
+ USE advec_interface_spgpu, ONLY: advec_dwarf_interface_spgpu
+ USE advec_interface_spgpu, ONLY:   allocate_interface_spgpu  
+ USE advec_interface_spgpu, ONLY: deallocate_interface_spgpu  
 #ifdef CUDACODE
    USE cudafor
 #endif 
@@ -111,15 +111,18 @@ PROGRAM advection_dwarf_cartesian_test
 
    INTEGER,DIMENSION(100) :: opttype_list,algtype_list,tformat_list 
    INTEGER,PARAMETER :: ipoles=0
+   INTEGER(c_int) :: nprocx=1
+   INTEGER(c_int) :: nprocy=1
+   INTEGER(c_int) :: nprocz=1
    CHARACTER(LEN=22) :: pnetvar_list(100)
    LOGICAL(c_bool) :: linitmpi=.TRUE.
    LOGICAL(c_bool) :: lupdatemulti=.FALSE.
    LOGICAL(c_bool) :: lvertsplit=.FALSE.
-   LOGICAL :: lfinitmpi=.TRUE.
+   LOGICAL :: lfinitmpi=.FALSE.
    LOGICAL :: lfupdatemulti=.FALSE.
    LOGICAL :: lfvertsplit=.FALSE.
 
-   INTEGER(c_int) itimecnt,nt,itestcnt,ierr
+   INTEGER(c_int) itimecnt,nt,itestcnt,ierr,istat
    CALL define_list_of_tests
    nt=((556+0))
    itestcnt=1
@@ -147,7 +150,8 @@ PROGRAM advection_dwarf_cartesian_test
     end if
     call c_f_procpointer( deallocate_addr, deallocate_interface )
 
-   CALL allocate_interface(linitmpi,1,1,1)
+   CALL allocate_interface(linitmpi,nprocx,nprocy,nprocz)
+   linitmpi=.FALSE.
    DO itimecnt=1,nt
      CALL advec_dwarf_interface(opttype_list(itestcnt), &
                                 algtype_list(itestcnt), &
@@ -181,7 +185,7 @@ PROGRAM advection_dwarf_cartesian_test
         stop
     end if
     call c_f_procpointer( deallocate_addr, deallocate_interface )
-   CALL allocate_interface(linitmpi,1,1,1)
+   CALL allocate_interface(linitmpi,nprocx,nprocy,nprocz)
    DO itimecnt=1,nt
      CALL advec_dwarf_interface(opttype_list(itestcnt), &
                                 algtype_list(itestcnt), &
@@ -216,31 +220,26 @@ PROGRAM advection_dwarf_cartesian_test
 !   end if
 !   call c_f_procpointer( deallocate_addr, deallocate_interface )
    CALL allocate_interface_spgpu(lfinitmpi,1,1,1)
-!  DO itimecnt=1,nt
-!    CALL advec_dwarf_interface_spgpu(opttype_list(itestcnt), &
-!                               algtype_list(itestcnt), &
-!                               lfupdatemulti,lfvertsplit, ipoles, &
-!                               itimecnt )                    
-!  ENDDO
+!@cuf istat=cudaDeviceSynchronize()
+  DO itimecnt=1,nt
+    CALL advec_dwarf_interface_spgpu(opttype_list(itestcnt), &
+                               algtype_list(itestcnt), &
+                               lfupdatemulti,lfvertsplit, ipoles, &
+                               itimecnt )                    
+  ENDDO
+!@cuf istat=cudaDeviceSynchronize()
    CALL deallocate_interface_spgpu(itimecnt)    
    CALL allocate_interface_dpgpu(lfinitmpi,1,1,1)
-!  DO itimecnt=1,nt
-!    CALL advec_dwarf_interface_dpgpu(opttype_list(itestcnt), &
-!                               algtype_list(itestcnt), &
-!                               lfupdatemulti,lfvertsplit, ipoles, &
-!                               itimecnt )                    
-!  ENDDO
+!@cuf istat=cudaDeviceSynchronize()
+  DO itimecnt=1,nt
+    CALL advec_dwarf_interface_dpgpu(opttype_list(itestcnt), &
+                               algtype_list(itestcnt), &
+                               lfupdatemulti,lfvertsplit, ipoles, &
+                               itimecnt )                    
+  ENDDO
+!@cuf istat=cudaDeviceSynchronize()
    CALL deallocate_interface_dpgpu(itimecnt)    
 
-!  itestcnt=1
-!  CALL allocate_interface_sp(.FALSE.,1,1,1)
-!  DO itimecnt=1,nt
-!    CALL advec_dwarf_interface_sp(opttype_list(itestcnt), &
-!                               algtype_list(itestcnt), &
-!                               lupdatemulti,lvertsplit, ipoles, &                    
-!                               itimecnt )                    
-!  ENDDO
-!  CALL deallocate_interface_sp(itimecnt)    
 CONTAINS
  function GetError() result(error_message)
    

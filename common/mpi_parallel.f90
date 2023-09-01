@@ -106,7 +106,7 @@ CONTAINS
       INTEGER coords(3),coordl(3)
       INTEGER ierr,ierr1,ierr1a,ierr2,ierr3,ierr4,rank
       ierr=0
-      CALL MPI_INITIALIZED(lmpiinit,ierr)
+!     CALL MPI_INITIALIZED(lmpiinit,ierr)
       IF(lmpiinit) THEN
         CALL MPI_Init(ierr)
 !************ Prepare copy of default communicator ************************
