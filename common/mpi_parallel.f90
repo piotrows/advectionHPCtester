@@ -12,9 +12,9 @@ MODULE mpi_parallel
 #endif /*PUREMPI*/
 #endif /*PUREMPI*/
    USE precisions, ONLY  : iintegers,euwp,sp,dp
-   USE parameters, ONLY  : nprocx,nprocy,nprocz,msz,mucnt
-   USE parameters, ONLY  : ibcx,ibcy,ibcz,isphere,ipoles
-   USE parameters, ONLY  : n
+   USE mod_parameters, ONLY  : nprocx,nprocy,nprocz,msz,mucnt
+   USE mod_parameters, ONLY  : ibcx,ibcy,ibcz,isphere,ipoles
+   USE mod_parameters, ONLY  : n
    IMPLICIT NONE
 #ifdef PUREMPI 
 #ifdef MPI77
@@ -87,7 +87,7 @@ CONTAINS
    END SUBROUTINE end_mpi
 
    SUBROUTINE geomset(lmpiinit)
-   USE parameters, ONLY: isphere,ipoles
+   USE mod_parameters, ONLY: isphere,ipoles
       LOGICAL ::  lmpiinit
 !
 !     setup geometry information for each processor
@@ -621,7 +621,7 @@ CONTAINS
 
 #if (STATICMEM == 0)
    SUBROUTINE init_subdomains
-   USE parameters, ONLY: np,mp,lp,n,m,l,nprocx,nprocy,nprocz 
+   USE mod_parameters, ONLY: np,mp,lp,n,m,l,nprocx,nprocy,nprocz 
    INTEGER(KIND=iintegers) npardiff,mpardiff,lpardiff
    INTEGER ierr,ipri
 !    np=CEILING(REAL(n)/REAL(nprocx))
@@ -699,7 +699,7 @@ CONTAINS
    END SUBROUTINE init_subdomains
 #else
    SUBROUTINE init_subdomains
-   USE parameters, ONLY: np,mp,lp,n,m,l 
+   USE mod_parameters, ONLY: np,mp,lp,n,m,l 
      nsubpos=(npos-1)*np
      msubpos=(mpos-1)*mp
      lsubpos=(lpos-1)*lp
@@ -711,7 +711,7 @@ CONTAINS
                           leftedge_in,rightedge_in,botedge_in,topedge_in,gndedge_in,skyedge_in, &
                            peE_in, peW_in, peS_in, peN_in, peG_in, peZ_in)
 
-   USE parameters, ONLY  : ibcx,ibcy,ibcz
+   USE mod_parameters, ONLY  : ibcx,ibcy,ibcz
    INTEGER (KIND=iintegers),INTENT(IN) :: mpi_comm_in,                &
                                           leftedge_in,rightedge_in,   &
                                            botedge_in,  topedge_in,   &
@@ -7498,7 +7498,7 @@ END SUBROUTINE sumaxminloc
    SUBROUTINE pnet_out_chunk(var_name,file_name,imode,ia1,ia2,ia3,ifrmd,imem,var,np,mp,lp,ih)
 !--------------------------------------------------------------------!
       USE pnetcdf
-      USE parameters, ONLY: n, l, m
+      USE mod_parameters, ONLY: n, l, m
       !Subroutine writes a specific chunk (vector, 2D plane, 3D variable)
       !Type of chunk is specified by imode:
       ! 0 - full 3D variable at time iframe in SINGLE PRECISION
@@ -8220,7 +8220,7 @@ END SUBROUTINE sumaxminloc
 SUBROUTINE pnet_create_common(ipnind,nfhd,DID,tVID)
 !--------------------------------------------------------------------!
   USE pnetcdf
-  USE parameters, ONLY: n,m,l
+  USE mod_parameters, ONLY: n,m,l
   INTEGER(KIND=MPI_OFFSET_KIND) pn,pm,pl,pt
   INTEGER(KIND=iintegers) ier,iprint,ipnind,cmode,nfhd,tVID,DID(4)
   INTEGER(KIND=iintegers) nfp

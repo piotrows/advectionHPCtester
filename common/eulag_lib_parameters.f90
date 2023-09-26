@@ -1,4 +1,5 @@
-MODULE parameters
+#include  "../advection/src_algorithms/renames.inc"
+MODULE mod_parameters
 #ifdef PUREMPI 
 #ifdef MPI90  
    USE mpi
@@ -696,4 +697,4 @@ SUBROUTINE header()
     
       end subroutine header
 #endif /*(1==0)*/
-END MODULE parameters
+END MODULE mod_parameters

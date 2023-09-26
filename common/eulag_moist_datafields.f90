@@ -1,8 +1,9 @@
+#include  "../advection/src_algorithms/renames.inc"
 #include "../advection/src_algorithms/defines.inc"
 #if (STATICMEM == 1)
 MODULE eulag_moist_datafields
    USE precisions
-   USE parameters, ONLY: n,m,l,np,mp,lp,ih
+   USE mod_parameters, ONLY: n,m,l,np,mp,lp,ih
    IMPLICIT NONE
   REAL(KIND=euwp),DIMENSION(1-ih:np+ih, 1-ih:mp+ih, 1-ih:lp+ih) :: &
   qv,qc,qr,qi,qs,qg
@@ -37,7 +38,7 @@ MODULE eulag_moist_datafields
   fqv_expl,fqc_expl,fqr_expl,fqi_expl
 CONTAINS
    SUBROUTINE allocate_eulag_moist_datafields
-   USE parameters, ONLY: np,mp,lp,ih
+   USE mod_parameters, ONLY: np,mp,lp,ih
    USE, intrinsic :: ieee_arithmetic, only: IEEE_Value, IEEE_signaling_NAN
    IMPLICIT NONE
    REAL(KIND=euwp) real_initial_value

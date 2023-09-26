@@ -21,10 +21,10 @@ PROGRAM advection_dwarf_cartesian_test
    USE mpi_parallel, ONLY: ttini,ttprt,ttbeg,ttend
    USE mpi_parallel, ONLY: init_subdomains
    USE advec_driver, ONLY: advec_dwarf 
-   USE parameters, ONLY: ih,ibcx,ibcy,ibcz
-   USE parameters, ONLY: n,m,l,np,mp,lp,nt
-   USE parameters, ONLY: set_eulagcommon_mpi_parameters 
-   USE parameters, ONLY: set_eulagcommon_lib_domainsize 
+   UE mod_parameters, ONLY: ih,ibcx,ibcy,ibcz
+   UE mod_parameters, ONLY: n,m,l,np,mp,lp,nt
+   UE mod_parameters, ONLY: set_eulagcommon_mpi_parameters 
+   UE mod_parameters, ONLY: set_eulagcommon_lib_domainsize 
    USE geometry, ONLY: topolog,metryc
    USE scratch_datafields, ONLY: xtracer,bcx,bcy
    USE scratch_datafields, ONLY: rhr,rhoadv,rhr2,rhoadv2,rhr3,rhoadv3
@@ -51,7 +51,7 @@ PROGRAM advection_dwarf_cartesian_test
    USE scratch_datafields, ONLY: deallocate_scratch_aux_datafields
 #endif /*STATICMEM*/   
 #ifdef TESTING
-   USE parameters, ONLY: n,m,l
+   UE mod_parameters, ONLY: n,m,l
    USE scratch_datafields, ONLY: xtest
    USE testing, ONLY: test_solution_energy,test_solution_error
    USE testing, ONLY: test_solution_ERR2_91,test_solution_ERR1_91
@@ -59,7 +59,7 @@ PROGRAM advection_dwarf_cartesian_test
    USE testing, ONLY: test_solution_ERRMAX_91
 #endif /*TESTING*/
 #ifdef PNETCDF
-   USE parameters, ONLY: npnetstep
+   UE mod_parameters, ONLY: npnetstep
    USE mpi_parallel, ONLY: pnet_out_chunk
 #endif /*PNETCDF*/
    IMPLICIT NONE

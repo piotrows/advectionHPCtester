@@ -44,7 +44,7 @@ SUBROUTINE filtprf(a,ifl1,ifl2,np,mp,lp,ih)
   !---------------------------------------------------------------------!
 SUBROUTINE filstrP(a,nullfl,np,mp,lp,ih)
 !---------------------------------------------------------------------!
-  USE parameters, ONLY: &
+  USE mod_parameters, ONLY: &
     ibcx,ibcy,ibcz
 
   ! Subroutine arguments

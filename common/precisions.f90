@@ -1,3 +1,4 @@
+#include  "../advection/src_algorithms/renames.inc"
 MODULE precisions
    USE, intrinsic :: iso_fortran_env
    IMPLICIT NONE

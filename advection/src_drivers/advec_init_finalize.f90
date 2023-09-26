@@ -8,10 +8,10 @@ MODULE advec_initialize
    USE mpi_parallel, ONLY: ttini,ttprt,ttbeg,ttend
    USE mpi_parallel, ONLY: init_subdomains
    USE advec_driver, ONLY: advec_dwarf
-   USE parameters, ONLY: ih,ibcx,ibcy,ibcz
-   USE parameters, ONLY: n,m,l,np,mp,lp,nt
-   USE parameters, ONLY: set_eulagcommon_mpi_parameters
-   USE parameters, ONLY: set_eulagcommon_lib_domainsize
+   USE mod_parameters, ONLY: ih,ibcx,ibcy,ibcz
+   USE mod_parameters, ONLY: n,m,l,np,mp,lp,nt
+   USE mod_parameters, ONLY: set_eulagcommon_mpi_parameters
+   USE mod_parameters, ONLY: set_eulagcommon_lib_domainsize
    USE geometry, ONLY: topolog,metryc
    USE scratch_datafields, ONLY: xtracer,bcx,bcy
    USE scratch_datafields, ONLY: rhr,rhoadv,rhr2,rhoadv2,rhr3,rhoadv3

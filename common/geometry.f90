@@ -1,9 +1,9 @@
 #include "../advection/src_algorithms/renames.inc"
 MODULE geometry
    USE precisions
-   USE parameters, ONLY: n,m,l,np,mp,lp,ih
-   USE parameters, ONLY: rds,rdsi,fcr0,btpl,ideep
-   USE parameters, ONLY: ibcx,ibcy,ibcz
+   USE mod_parameters, ONLY: n,m,l,np,mp,lp,ih
+   USE mod_parameters, ONLY: rds,rdsi,fcr0,btpl,ideep
+   USE mod_parameters, ONLY: ibcx,ibcy,ibcz
    USE mpi_parallel, ONLY:  update,update3,updateflt,updategs,mybarrier
    USE mpi_parallel, ONLY: iup,npos,mpos,lpos,nsubpos,msubpos,lsubpos
    USE mpi_parallel, ONLY: mype,leftedge,rightedge,botedge,topedge,gndedge,skyedge
@@ -38,9 +38,9 @@ CONTAINS
 !------------------------------------------------------------------
    SUBROUTINE topolog
 !------------------------------------------------------------------
-      USE parameters, ONLY:  isphere, ipoles
-      USE parameters, ONLY: dx,dy,dz,dxa,dya
-      USE parameters, ONLY: pi,pi2,pih,btpl,yj0,ang
+      USE mod_parameters, ONLY:  isphere, ipoles
+      USE mod_parameters, ONLY: dx,dy,dz,dxa,dya
+      USE mod_parameters, ONLY: pi,pi2,pih,btpl,yj0,ang
       INTEGER (KIND=IINTEGERS) :: i,j,k,ia,ja,ka
 
 ! ----  specify computational grid
@@ -208,7 +208,7 @@ CONTAINS
 !------------------------------------------------------------------
    SUBROUTINE topol_vert(amp,width,radius,np,mp,ih)
 !------------------------------------------------------------------
-      USE parameters, ONLY: dz,l
+      USE mod_parameters, ONLY: dz,l
       INTEGER (KIND=IINTEGERS) :: i,j,k,ia,ja,ka,np,mp,ih
       REAL(KIND=euwp)pi,pi2,pih
       REAL(KIND=euwp) angle,zb,cang,sang,xx,yy,rr 
@@ -261,9 +261,9 @@ CONTAINS
                          cosa_in,sina_in,tnga_in, &
                          np,mp,lp,n,m,l,ih)
 !------------------------------------------------------------------
-      USE parameters, ONLY:  isphere, ipoles
-      USE parameters, ONLY: dx,dy,dz,dxa,dya
-      USE parameters, ONLY: pi,pi2,pih
+      USE mod_parameters, ONLY:  isphere, ipoles
+      USE mod_parameters, ONLY: dx,dy,dz,dxa,dya
+      USE mod_parameters, ONLY: pi,pi2,pih
       INTEGER (KIND=IINTEGERS) :: i,j,k
       INTEGER (KIND=IINTEGERS) :: np,mp,lp,n,m,l,ih 
       REAL(KIND=euwp), DIMENSION(1-ih:np+ih,1-ih:mp+ih)   ::  xcr_in,ycr_in
@@ -340,7 +340,7 @@ CONTAINS
                          g33_in,gac_in,gmm_in,np,mp,lp,ih)  
 !----------------------------------------------------------------------!
 
-      USE parameters,  ONLY:                     &
+      USE mod_parameters,  ONLY:                     &
          dxih, dyih, dzih, rds, isphere, ideep, ipoles
       USE mpi_parallel, ONLY: update,  updateflt, update3
       !----------------------------------------------------------------------!
@@ -535,7 +535,7 @@ CONTAINS
    SUBROUTINE metryc
 !----------------------------------------------------------------------!
 
-  USE parameters,  ONLY:                     &
+  USE mod_parameters,  ONLY:                     &
          dxih, dyih, dzih, rds, isphere, ideep, ih, ipoles
   USE mpi_parallel, ONLY: update,  updateflt, update3
   USE scratch_datafields, ONLY: esxb,esyb,dsxb,dsyb,    &

@@ -17,7 +17,7 @@ CONTAINS
         END DO
      END SUBROUTINE perturb_2D_signal
      SUBROUTINE noise_3d_wave(noise_amp,noise_phase,f1,np,mp,lp,ih)
-        USE parameters, ONLY: pi2,n,m,l
+        USE mod_parameters, ONLY: pi2,n,m,l
         USE mpi_parallel, ONLY: nsubpos,msubpos,lsubpos
         INTEGER(KIND=iintegers),INTENT(IN) :: np,mp,lp,ih
         INTEGER(KIND=iintegers) :: i,j,k,ia,ja,ka

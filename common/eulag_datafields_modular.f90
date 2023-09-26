@@ -1,7 +1,8 @@
+#include  "../advection/src_algorithms/renames.inc"
 #if (STATICMEM == 1)
 MODULE eulag_datafields
    USE precisions
-   USE parameters, ONLY: n,m,l,np,mp,lp,ih
+   USE mod_parameters, ONLY: n,m,l,np,mp,lp,ih
    IMPLICIT NONE
 !Advection dwarf testing
    REAL(KIND=euwp),DIMENSION(np,mp,lp) :: hi
@@ -113,7 +114,7 @@ MODULE eulag_datafields
    CONTAINS
 
    SUBROUTINE allocate_eulag_datafields
-   USE parameters, ONLY: np,mp,lp,ih
+   USE mod_parameters, ONLY: np,mp,lp,ih
    USE, intrinsic :: ieee_arithmetic, only: IEEE_Value, IEEE_signaling_NAN
    REAL(KIND=euwp) real_initial_value
    INTEGER ierr,ierrtot
@@ -187,7 +188,7 @@ MODULE eulag_datafields
    END SUBROUTINE allocate_eulag_datafields
 
    SUBROUTINE allocate_reference_datafields
-   USE parameters, ONLY: np,mp,lp,ih
+   USE mod_parameters, ONLY: np,mp,lp,ih
    USE, intrinsic :: ieee_arithmetic, only: IEEE_Value, IEEE_signaling_NAN
    REAL(KIND=euwp) real_initial_value
    INTEGER ierr,ierrtot
@@ -213,7 +214,7 @@ MODULE eulag_datafields
    END SUBROUTINE allocate_reference_datafields
 
    SUBROUTINE allocate_advbc_datafields
-   USE parameters, ONLY: np,mp,lp,ih
+   USE mod_parameters, ONLY: np,mp,lp,ih
    USE, intrinsic :: ieee_arithmetic, only: IEEE_Value, IEEE_signaling_NAN
    REAL(KIND=euwp) real_initial_value
    INTEGER ierr,ierrtot
@@ -316,7 +317,7 @@ END MODULE eulag_datafields
 #endif /*STATICMEM*/
 #if(1==0)
    SUBROUTINE allocate_eulag_all_datafields
-   USE parameters, ONLY: np,mp,lp,ih
+   USE mod_parameters, ONLY: np,mp,lp,ih
    USE, intrinsic :: ieee_arithmetic, only: IEEE_Value, IEEE_signaling_NAN
    REAL(KIND=euwp) real_initial_value
    INTEGER ierr,ierrtot
@@ -446,7 +447,7 @@ END MODULE eulag_datafields
 #endif
    END SUBROUTINE allocate_eulag_all_datafields
    SUBROUTINE allocate_geometry_all_datafields
-   USE parameters, ONLY: n,m,l,np,mp,lp,ih
+   USE mod_parameters, ONLY: n,m,l,np,mp,lp,ih
    USE, intrinsic :: ieee_arithmetic, only: IEEE_Value, IEEE_signaling_NAN
    IMPLICIT NONE
    REAL(KIND=euwp) real_initial_value

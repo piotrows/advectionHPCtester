@@ -1,3 +1,4 @@
+#include  "../src_algorithms/renames.inc"
 MODULE advec_init_interface_dpgpu
    USE advec_initialize
    USE :: iso_c_binding

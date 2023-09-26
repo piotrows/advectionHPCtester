@@ -1,7 +1,8 @@
+#include  "../advection/src_algorithms/renames.inc"
 #if (STATICMEM == 1)
 MODULE scratch_datafields
    USE precisions
-   USE parameters, ONLY: np,mp,lp,ih,msz,mucnt,lrd
+   USE mod_parameters, ONLY: np,mp,lp,ih,msz,mucnt,lrd
 !MPI scratch storage
 !Buffers for I/O  here are np+1 instead of np, because at times
 !in EULAG we use variables of size 1-ih:np+1+ih
@@ -182,7 +183,7 @@ MODULE scratch_datafields
    CONTAINS
 
    SUBROUTINE allocate_scratch_aux_datafields
-   USE parameters, ONLY: np,mp,lp,ih,msz,mucnt,lrd
+   USE mod_parameters, ONLY: np,mp,lp,ih,msz,mucnt,lrd
    USE, intrinsic :: ieee_arithmetic, only: IEEE_Value, IEEE_signaling_NAN
    IMPLICIT NONE
    REAL(KIND=euwp) real_initial_value
@@ -205,7 +206,7 @@ IF(ierrtot/=0) print *,'scratch aux allocate status: total number of errors is: 
    END SUBROUTINE allocate_scratch_aux_datafields
 
    SUBROUTINE allocate_scratch_solver_datafields
-   USE parameters, ONLY: np,mp,lp,ih,msz,mucnt,lrd
+   USE mod_parameters, ONLY: np,mp,lp,ih,msz,mucnt,lrd
    USE, intrinsic :: ieee_arithmetic, only: IEEE_Value, IEEE_signaling_NAN
    IMPLICIT NONE
    REAL(KIND=euwp) real_initial_value
@@ -280,7 +281,7 @@ rlsqr_ltmp(:,:,:) = real_initial_value
    END SUBROUTINE allocate_scratch_solver_datafields
 
    SUBROUTINE allocate_scratch_mpdata_datafields
-   USE parameters, ONLY: np,mp,lp,ih,msz,mucnt,lrd
+   USE mod_parameters, ONLY: np,mp,lp,ih,msz,mucnt,lrd
    USE, intrinsic :: ieee_arithmetic, only: IEEE_Value, IEEE_signaling_NAN
    IMPLICIT NONE
    REAL(KIND=euwp) real_initial_value
@@ -334,7 +335,7 @@ IF(ierrtot/=0) print *,'scratch mpdata allocate status: total number of errors i
    END SUBROUTINE allocate_scratch_mpdata_datafields
 
    SUBROUTINE allocate_scratch_advdrv_datafields
-   USE parameters, ONLY: np,mp,lp,ih,msz,mucnt,lrd
+   USE mod_parameters, ONLY: np,mp,lp,ih,msz,mucnt,lrd
    USE, intrinsic :: ieee_arithmetic, only: IEEE_Value, IEEE_signaling_NAN
    IMPLICIT NONE
    REAL(KIND=euwp) real_initial_value
@@ -409,7 +410,7 @@ IF(ierrtot/=0) print *,'scratch advdrv allocate status: total number of errors i
    END SUBROUTINE allocate_scratch_advdrv_datafields
 
    SUBROUTINE allocate_scratch_advtst_datafields
-   USE parameters, ONLY: np,mp,lp,ih,msz,mucnt,lrd
+   USE mod_parameters, ONLY: np,mp,lp,ih,msz,mucnt,lrd
    USE, intrinsic :: ieee_arithmetic, only: IEEE_Value, IEEE_signaling_NAN
    IMPLICIT NONE
    REAL(KIND=euwp) real_initial_value
@@ -437,7 +438,7 @@ IF(ierrtot/=0) print *,'scratch advtst allocate status: total number of errors i
    END SUBROUTINE allocate_scratch_advtst_datafields
 
    SUBROUTINE allocate_scratch_geometry_datafields
-   USE parameters, ONLY: np,mp,lp,ih,msz,mucnt,lrd
+   USE mod_parameters, ONLY: np,mp,lp,ih,msz,mucnt,lrd
    USE, intrinsic :: ieee_arithmetic, only: IEEE_Value, IEEE_signaling_NAN
    IMPLICIT NONE
    REAL(KIND=euwp) real_initial_value
@@ -481,7 +482,7 @@ IF(ierrtot/=0) print *,'scratch geometry allocate status: total number of errors
    END SUBROUTINE allocate_scratch_geometry_datafields
 
    SUBROUTINE allocate_scratch_mpi_datafields
-   USE parameters, ONLY: np,mp,lp,ih,msz,mucnt,lrd
+   USE mod_parameters, ONLY: np,mp,lp,ih,msz,mucnt,lrd
    USE, intrinsic :: ieee_arithmetic, only: IEEE_Value, IEEE_signaling_NAN
    IMPLICIT NONE
    REAL(KIND=euwp) real_initial_value

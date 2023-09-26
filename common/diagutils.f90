@@ -1,7 +1,7 @@
 #include "../advection/src_algorithms/renames.inc"
 MODULE eulag_diagutils
 USE precisions
-USE parameters, ONLY: n,m,nm,nml
+USE mod_parameters, ONLY: n,m,nm,nml
 USE mpi_parallel, ONLY: ttbeg,ttend
 
 IMPLICIT NONE
@@ -22,7 +22,7 @@ SUBROUTINE filstrP(a,nullfl)
     dt,dx,dy,dz,dti,dxi,dyi,dzi,zb,igrid,j3, &
     ibcx,ibcy,ibcz,irlx,irly
   
-  USE kind_parameters, ONLY: euwp
+  USE kind_mod_parameters, ONLY: euwp
   
   USE src_parallel, ONLY: updatelr, updatebt, update
   
@@ -483,7 +483,7 @@ END SUBROUTINE calcsumaxminloc
 
 SUBROUTINE compute_courlipsch_Agrid(cr1,cr2,ox,oy,oz,h,dxi,dyi,dzi,dt,np,mp,lp,ih) 
   USE mpi_parallel, ONLY:globmax,update3,iup
-  USE parameters, ONLY: ipoles,ibcx,ibcy,ibcz
+  USE mod_parameters, ONLY: ipoles,ibcx,ibcy,ibcz
   USE bconditions, ONLY: remove_cyclic_offset_full,cp_scnd_last_to_halo_xyz_full
   INTEGER(KIND=iintegers), INTENT(IN) :: np,mp,lp,ih
   REAL_euwp, INTENT(IN) ::                            &
@@ -589,7 +589,7 @@ END SUBROUTINE compute_courlipsch_Agrid_full
 SUBROUTINE compute_courants(cr3d,crxy,crxz,cryz,crx,cry,crz,ox,oy,oz,h,   &
                             ntimelevel,dxi,dyi,dzi,dt,np,mp,lp,ih) 
   USE mpi_parallel, ONLY:globmax,mype
-  USE parameters, ONLY: ipoles,ibcx,ibcy,ibcz
+  USE mod_parameters, ONLY: ipoles,ibcx,ibcy,ibcz
   INTEGER(KIND=iintegers), INTENT(IN) :: np,mp,lp,ih,ntimelevel
   REAL_euwp, INTENT(IN) ::                                 &
                     h(1-ih:np+ih,1-ih:mp+ih,1-ih:lp+ih),         &

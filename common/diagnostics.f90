@@ -2,7 +2,7 @@
 #include "../advection/src_algorithms/renames.inc"
 MODULE eulag_diagnostics 
 USE precisions
-USE parameters, ONLY: spexi
+USE mod_parameters, ONLY: spexi
 USE mpi_parallel, ONLY: ttbeg,ttend
 #ifdef PNETCDF
   USE mpi_parallel, ONLY: pnet_out_chunk
@@ -1082,7 +1082,7 @@ SUBROUTINE diagnos_actual(iwrite,u,v,w,th,np,mp,lp,ih,tht,pext,rho)
   USE mpi_parallel, ONLY: mype
   USE mpi_parallel, ONLY: globsumaxminv
   USE eulag_diagutils, ONLY: wrtfmbuf,wrttobuf,calcavgmaxmin
-  USE parameters, ONLY : ibcx,ibcy,ibcz,ipoles
+  USE mod_parameters, ONLY : ibcx,ibcy,ibcz,ipoles
 
 
   !----------------------------------------------------------------------!
@@ -1395,7 +1395,7 @@ SUBROUTINE diagnos_difference(iwrite,uref,vref,thref,the, &
 
   USE mpi_parallel, ONLY: mype
   USE mpi_parallel, ONLY: globsumaxminv
-  USE parameters, ONLY: capi,rg,cmpex,spexi 
+  USE mod_parameters, ONLY: capi,rg,cmpex,spexi 
   USE eulag_diagutils, ONLY: wrtfmbuf,wrttobuf,calcavgmaxmin
   USE scratch_datafields, ONLY: scr1
 
@@ -1547,7 +1547,7 @@ SUBROUTINE diagnos_advection(ox,oy,oz,rho,dxi,dyi,dzi,dt,np,mp,lp,ih)
   USE mpi_parallel, ONLY: globsumaxminv,update3,iup
   USE eulag_diagutils, ONLY: wrtfmbuf,wrttobuf,calcavgmaxmin
   USE bconditions, ONLY: remove_cyclic_offset_full,cp_scnd_last_to_halo_xyz_full
-  USE parameters, ONLY: nml,ibcx,ibcy,ibcz,ipoles
+  USE mod_parameters, ONLY: nml,ibcx,ibcy,ibcz,ipoles
 
 
   !----------------------------------------------------------------------!
@@ -1788,7 +1788,7 @@ SUBROUTINE diagnos_advection_vz(ox,oy,oz,rho,np,mp,lp,ih)
   USE mpi_parallel, ONLY: mype
   USE mpi_parallel, ONLY: globsumaxminv
   USE eulag_diagutils, ONLY: wrtfmbuf,wrttobuf,calcavgmaxmin
-  USE parameters, ONLY: n,m
+  USE mod_parameters, ONLY: n,m
 
   !----------------------------------------------------------------------!
 
@@ -1904,7 +1904,7 @@ END SUBROUTINE diagnos_advection_vz
 ! Transform solver pressure/exner perturbation to Pa
 !----------------------------------------------------------------------!
 SUBROUTINE transform_exner_to_pascals(pvar_in,pPa_out,ppe,np,mp,lp,ih)
-USE parameters, ONLY: spexi,rg,cmpex,capi
+USE mod_parameters, ONLY: spexi,rg,cmpex,capi
 !------------------------------------------------------------------
 
   !--------------------------------------------------------------------!
@@ -1951,7 +1951,7 @@ END SUBROUTINE transform_exner_to_pascals
 
 SUBROUTINE exam_var(var,vname,next,np,mp,lp,ih)
   USE mpi_parallel, ONLY: globsumaxminlocv,globsum,nsubpos,msubpos,lsubpos,mype
-  USE parameters, ONLY: nml
+  USE mod_parameters, ONLY: nml
   USE eulag_diagutils, ONLY: wrtfmbuf,wrttobuf,calcavgmaxmin
   USE eulag_diagutils, ONLY: calcsumaxminloc
 !  USE eulag_datafields, ONLY: zcr,g13,g23,g33
@@ -2119,7 +2119,7 @@ SUBROUTINE exam_var(var,vname,next,np,mp,lp,ih)
 
   SUBROUTINE exam_divergence(var,vname,dt,np,mp,lp,ih)
   USE mpi_parallel, ONLY: globsumaxminlocv,globsum,mype
-  USE parameters, ONLY: nml
+  USE mod_parameters, ONLY: nml
   USE eulag_diagutils, ONLY: wrtfmbuf,wrttobuf,calcavgmaxmin
   USE eulag_diagutils, ONLY: calcsumaxminloc
 !  USE eulag_datafields, ONLY: zcr,g13,g23,g33
@@ -2216,7 +2216,7 @@ SUBROUTINE exam_var(var,vname,next,np,mp,lp,ih)
                          vare,vnamee, &
                           dt,np,mp,lp,ih)
   USE mpi_parallel, ONLY: globsumaxminlocv,globsum,mype
-  USE parameters, ONLY: nml
+  USE mod_parameters, ONLY: nml
   USE eulag_diagutils, ONLY: wrtfmbuf,wrttobuf,calcavgmaxmin
   USE eulag_diagutils, ONLY: calcsumaxminloc
 !  USE eulag_datafields, ONLY: zcr,g13,g23,g33
@@ -2476,7 +2476,7 @@ SUBROUTINE exam_var(var,vname,next,np,mp,lp,ih)
 
       SUBROUTINE check_nans_coef(c11,c12,c13,c21,c22,c23,c31,c32,c33,etainv,np,mp,lp,ih)
         USE mpi_parallel, ONLY: mype
-        USE parameters, ONLY: ibcx,ibcy,ibcz,ipoles
+        USE mod_parameters, ONLY: ibcx,ibcy,ibcz,ipoles
         INTEGER(KIND=iintegers),INTENT(IN) ::  np,mp,lp,ih
         CHARACTER(5) :: varname
         REAL(KIND=euwp),DIMENSION(1-ih:np+ih, 1-ih:mp+ih, 1-ih:lp+ih) :: etainv 
@@ -2684,7 +2684,7 @@ SUBROUTINE diagnos_driver(ltimeadapt,lsubstepping, &
   USE mpi_parallel, ONLY: pnet_out_lng_anel,pnet_out_lng_cmpr 
 #endif
   USE eulag_diagutils, ONLY: wrtfmbuf,wrttobuf,calcavgmaxmin
-  USE parameters, ONLY: icmprss 
+  USE mod_parameters, ONLY: icmprss 
 
 
   INTEGER(KIND=iintegers),INTENT(IN) ::  np,mp,lp,ih

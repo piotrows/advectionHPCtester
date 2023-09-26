@@ -1,12 +1,12 @@
-MODULE testing
 #include  "../src_algorithms/renames.inc"
+MODULE testing
    USE precisions
    USE mpi_parallel, ONLY: mype,globsum,globmax,globmin
    USE mpi_parallel, ONLY: leftedge,rightedge,botedge,topedge
    USE mpi_parallel, ONLY: nsubpos,msubpos,lsubpos
    USE module_velprd, ONLY: velprdA_to_C_ver2
 !   USE geometry, ONLY: physical2contravariant
-   USE   parameters, ONLY: dx,dy,dz,dt,dx00,nt,nmli,timetot
+   USE   mod_parameters, ONLY: dx,dy,dz,dt,dx00,nt,nmli,timetot
 #ifdef PNETCDF
    USE mpi_parallel, ONLY: pnet_out_chunk
 #endif /*PNETCDF*/
@@ -91,7 +91,7 @@ CONTAINS
    ! Calls in subroutine SET_INITIAL91: 
    SUBROUTINE set_initial91(uadv_c,vadv_c,wadv_c,x_data,rho,np,mp,lp,ih)
       USE scratch_datafields, ONLY: xtest
-      USE parameters, ONLY: rds,n,dxa
+      USE mod_parameters, ONLY: rds,n,dxa
       USE geometry, ONLY: xcr,ycr,cosa,sina,sinx,cosx !,coscx,cosCy
       USE geometry, ONLY: g11,g12,g13,g21,g22,g23,g33
       INTEGER(KIND=iintegers) :: np,mp,lp,ih
@@ -257,7 +257,7 @@ x_data(:,:,:)=0._euwp
 
    SUBROUTINE set_initial15_perturbed(noise_amp,noise_phase,uadv_c,vadv_c,wadv_c,x_data,rho,np,mp,lp,ih)
       USE scratch_datafields, ONLY: xtest
-      USE parameters, ONLY: n,m,l,pi2 
+      USE mod_parameters, ONLY: n,m,l,pi2 
       INTEGER(KIND=iintegers) :: np,mp,lp,ih
       INTEGER(KIND=iintegers) :: i,j,k,ia,ja,ka
       REAL_euwp, DIMENSION(:,:,:),ALLOCATABLE :: &
@@ -645,7 +645,7 @@ x_data(:,:,:)=0._euwp
         xforc_expl(1:np,1:mp,1:lp)=0.003_euwp
     END SUBROUTINE init_forces
        SUBROUTINE init_var_perturbed(noise_amp,noise_phase,var,bcx,bcy,np,mp,lp,ih)
-        USE parameters, ONLY: pi2,n,m,l
+        USE mod_parameters, ONLY: pi2,n,m,l
         INTEGER(KIND=iintegers),INTENT(IN) :: np,mp,lp,ih
         INTEGER(KIND=iintegers) :: i,j,k,ia,ja,ka 
         REAL(KIND=euwp) :: noise_amp,noise_phase
@@ -715,7 +715,7 @@ x_data(:,:,:)=0._euwp
 
     END SUBROUTINE init_var_perturbed
        SUBROUTINE init_data_perturbed(noise_amp,noise_phase,rhr,h,hi,bcx,bcy,np,mp,lp,ih)
-        USE parameters, ONLY: pi2,n,m,l
+        USE mod_parameters, ONLY: pi2,n,m,l
         USE mpi_parallel, ONLY: nsubpos,msubpos,lsubpos 
         INTEGER(KIND=iintegers),INTENT(IN) :: np,mp,lp,ih
         INTEGER(KIND=iintegers) :: i,j,k,ia,ja,ka 

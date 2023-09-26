@@ -1,7 +1,7 @@
 #include  "../advection/src_algorithms/renames.inc"
 MODULE bconditions
    USE precisions
-   USE parameters, ONLY: ibcx,ibcy,ibcz,ipoldiffmode 
+   USE mod_parameters, ONLY: ibcx,ibcy,ibcz,ipoldiffmode 
    USE mpi_parallel, ONLY: leftedge,rightedge,botedge,topedge,gndedge,skyedge
    IMPLICIT NONE
 CONTAINS

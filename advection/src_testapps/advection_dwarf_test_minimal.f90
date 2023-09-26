@@ -126,6 +126,27 @@ PROGRAM advection_dwarf_cartesian_test
    CALL define_list_of_tests
    nt=((556+0))
    itestcnt=1
+ lfinitmpi=.TRUE.
+   CALL allocate_interface_dpgpu(lfinitmpi,1,1,1)
+!@cuf istat=cudaDeviceSynchronize()
+  DO itimecnt=1,nt
+    CALL advec_dwarf_interface_dpgpu(opttype_list(itestcnt), &
+                               algtype_list(itestcnt), &
+                               lfupdatemulti,lfvertsplit, ipoles, &
+                               itimecnt )                    
+  ENDDO
+!@cuf istat=cudaDeviceSynchronize()
+   CALL deallocate_interface_dpgpu(itimecnt)    
+   CALL allocate_interface_spgpu(lfinitmpi,1,1,1)
+!@cuf istat=cudaDeviceSynchronize()
+  DO itimecnt=1,nt
+    CALL advec_dwarf_interface_spgpu(opttype_list(itestcnt), &
+                               algtype_list(itestcnt), &
+                               lfupdatemulti,lfvertsplit, ipoles, &
+                               itimecnt )                    
+  ENDDO
+!@cuf istat=cudaDeviceSynchronize()
+   CALL deallocate_interface_spgpu(itimecnt)    
    libhandle=dlmopen(dlist,"./lib/libadvection_interface_dp.so"//c_null_char, RTLD_LAZY)
     if (.not. c_associated(libhandle))then
         print*, 'Unable to load DLL ./lib/libadvection_interface_dp.so'
@@ -219,26 +240,6 @@ PROGRAM advection_dwarf_cartesian_test
 !       stop
 !   end if
 !   call c_f_procpointer( deallocate_addr, deallocate_interface )
-   CALL allocate_interface_spgpu(lfinitmpi,1,1,1)
-!@cuf istat=cudaDeviceSynchronize()
-  DO itimecnt=1,nt
-    CALL advec_dwarf_interface_spgpu(opttype_list(itestcnt), &
-                               algtype_list(itestcnt), &
-                               lfupdatemulti,lfvertsplit, ipoles, &
-                               itimecnt )                    
-  ENDDO
-!@cuf istat=cudaDeviceSynchronize()
-   CALL deallocate_interface_spgpu(itimecnt)    
-   CALL allocate_interface_dpgpu(lfinitmpi,1,1,1)
-!@cuf istat=cudaDeviceSynchronize()
-  DO itimecnt=1,nt
-    CALL advec_dwarf_interface_dpgpu(opttype_list(itestcnt), &
-                               algtype_list(itestcnt), &
-                               lfupdatemulti,lfvertsplit, ipoles, &
-                               itimecnt )                    
-  ENDDO
-!@cuf istat=cudaDeviceSynchronize()
-   CALL deallocate_interface_dpgpu(itimecnt)    
 
 CONTAINS
  function GetError() result(error_message)

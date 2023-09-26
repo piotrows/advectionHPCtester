@@ -22,8 +22,8 @@ MODULE advec_interface_spgpu
    USE scratch_datafields, ONLY: xtracer,bcx,bcy
    USE scratch_datafields, ONLY: rhr,rhoadv
    USE scratch_datafields, ONLY: uadv,vadv,wadv
-   USE parameters, ONLY: ih,ibcx,ibcy,ibcz,ibcx,ibcy,ibcz
-   USE parameters, ONLY: np,mp,lp
+   USE mod_parameters, ONLY: ih,ibcx,ibcy,ibcz,ibcx,ibcy,ibcz
+   USE mod_parameters, ONLY: np,mp,lp
    USE precisions
    INTEGER,INTENT(IN) :: t_adv,legacyoptmode,ipoles,itime_counter
    LOGICAL,INTENT(IN) :: lupdatemulti,lvertsplit
