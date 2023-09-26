@@ -1,9 +1,11 @@
+#include  "../advection/src_algorithms/renames.inc"
 MODULE bconditions
    USE precisions
    USE parameters, ONLY: ibcx,ibcy,ibcz,ipoldiffmode 
    USE mpi_parallel, ONLY: leftedge,rightedge,botedge,topedge,gndedge,skyedge
    IMPLICIT NONE
 CONTAINS
+#include "../advection/src_algorithms/renames.inc"
 SUBROUTINE halo_zero_z(x,np,mp,lp,ih)
 !---------------------------------------------------------------------!
   INTEGER(KIND=iintegers) np,mp,lp,ih

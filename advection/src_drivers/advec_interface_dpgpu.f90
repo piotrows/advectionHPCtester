@@ -1,3 +1,4 @@
+#include  "../src_algorithms/renames.inc"
 MODULE advec_interface_dpgpu
    USE, INTRINSIC :: iso_c_binding
    IMPLICIT NONE

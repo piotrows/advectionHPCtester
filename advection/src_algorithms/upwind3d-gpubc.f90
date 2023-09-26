@@ -1,6 +1,8 @@
+#include "renames.inc"
 MODULE module_upwind3d_gpubc
    USE precisions, ONLY  : iintegers,euwp
    USE mpi_parallel, ONLY: leftedge,rightedge,botedge,topedge,gndedge,skyedge
+   USE mpdataoperators
 #ifdef CUDACODE
    USE mpi_parallel, ONLY: istream1, istream2
 #endif
@@ -13,10 +15,10 @@ MODULE module_upwind3d_gpubc
    USE cudafor
 #endif
    IMPLICIT NONE
+#include "defines.inc"
+!#include "mpdataoperators.inc"
 
 CONTAINS
-#include "defines.inc"
-#include "mpdataoperators.inc"
 SUBROUTINE upwind3d_gpubc(u1,u2,u3, &
                           x_in,xant,&
                           xforc_impl,xforc_expl,&

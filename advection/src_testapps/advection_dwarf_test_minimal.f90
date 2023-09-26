@@ -12,12 +12,12 @@
 !#define DWARF11
 !#define DWARF12
 PROGRAM advection_dwarf_cartesian_test
- USE advec_interface_dpgpu, ONLY: advec_dwarf_interface_dpgpu
- USE advec_interface_dpgpu, ONLY:   allocate_interface_dpgpu  
- USE advec_interface_dpgpu, ONLY: deallocate_interface_dpgpu  
- USE advec_interface_spgpu, ONLY: advec_dwarf_interface_spgpu
- USE advec_interface_spgpu, ONLY:   allocate_interface_spgpu  
- USE advec_interface_spgpu, ONLY: deallocate_interface_spgpu  
+ USE advec_interface_dpgpu_dpgpu, ONLY: advec_dwarf_interface_dpgpu
+ USE advec_interface_dpgpu_dpgpu, ONLY:   allocate_interface_dpgpu  
+ USE advec_interface_dpgpu_dpgpu, ONLY: deallocate_interface_dpgpu  
+ USE advec_interface_spgpu_spgpu, ONLY: advec_dwarf_interface_spgpu
+ USE advec_interface_spgpu_spgpu, ONLY:   allocate_interface_spgpu  
+ USE advec_interface_spgpu_spgpu, ONLY: deallocate_interface_spgpu  
 #ifdef CUDACODE
    USE cudafor
 #endif 

@@ -1,3 +1,4 @@
+#include  "../advection/src_algorithms/renames.inc"
 MODULE filters
 USE precisions, ONLY: euwp,iintegers    
 USE mpi_parallel, ONLY: leftedge,rightedge,botedge,topedge,gndedge,skyedge 

@@ -11,10 +11,12 @@
 !#define DWARF10
 !#define DWARF11
 !#define DWARF12
+#include  "../src_algorithms/renames.inc"
+
 PROGRAM advection_dwarf_cartesian_test
-   USE advec_interface_dp, ONLY: advec_dwarf_interface_dp
-   USE advec_interface_dp, ONLY:   allocate_interface_dp  
-   USE advec_interface_dp, ONLY: deallocate_interface_dp  
+   USE advec_interface_dp_dp, ONLY: advec_dwarf_interface_dp
+   USE advec_interface_dp_dp, ONLY:   allocate_interface_dp  
+   USE advec_interface_dp_dp, ONLY: deallocate_interface_dp  
    INTEGER,DIMENSION(100) :: opttype_list,algtype_list,tformat_list 
    INTEGER,PARAMETER :: ipoles=0
    CHARACTER(LEN=22) :: pnetvar_list(100)

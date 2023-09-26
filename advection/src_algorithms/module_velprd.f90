@@ -6,6 +6,7 @@
 ! method will be added in the future (itraj=1). 
 !
 
+#include "renames.inc"
 MODULE module_velprd 
     USE precisions, ONLY  : iintegers,euwp
     USE mpi_parallel, ONLY: leftedge,rightedge,botedge,topedge,gndedge,skyedge

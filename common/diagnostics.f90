@@ -1,4 +1,5 @@
 #undef PNETCDF
+#include "../advection/src_algorithms/renames.inc"
 MODULE eulag_diagnostics 
 USE precisions
 USE parameters, ONLY: spexi

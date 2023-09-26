@@ -1,3 +1,5 @@
+
+#include "renames.inc"
 MODULE module_antidiff3d_standard_gpubc
    USE precisions, ONLY  : iintegers,euwp
    USE mpi_parallel, ONLY: leftedge,rightedge,botedge,topedge,gndedge,skyedge
@@ -5,11 +7,11 @@ MODULE module_antidiff3d_standard_gpubc
    USE mpi_parallel, ONLY: istream1,istream2
 #endif
    USE epsilons, ONLY: ep => ep_nonos
+   USE mpdataoperators
 
    IMPLICIT NONE
 CONTAINS
 #include "defines.inc"
-#include "mpdataoperators.inc"
 
         SUBROUTINE antidiff3d_standard_gpubc(lupdatemulti,u1,u2,u3,xant,x_in,rhr,h, &
                                              iflip,ipoles0,ibcx0,ibcy0,ibcz0,np,mp,lp,ih, &

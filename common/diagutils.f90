@@ -1,3 +1,4 @@
+#include "../advection/src_algorithms/renames.inc"
 MODULE eulag_diagutils
 USE precisions
 USE parameters, ONLY: n,m,nm,nml

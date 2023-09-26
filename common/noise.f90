@@ -1,3 +1,4 @@
+#include  "../advection/src_algorithms/renames.inc"
 MODULE noise
     USE precisions, ONLY  : iintegers,euwp
     IMPLICIT NONE

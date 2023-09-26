@@ -1,4 +1,5 @@
 MODULE testing
+#include  "../src_algorithms/renames.inc"
    USE precisions
    USE mpi_parallel, ONLY: mype,globsum,globmax,globmin
    USE mpi_parallel, ONLY: leftedge,rightedge,botedge,topedge

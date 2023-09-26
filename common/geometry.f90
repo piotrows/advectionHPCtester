@@ -1,3 +1,4 @@
+#include "../advection/src_algorithms/renames.inc"
 MODULE geometry
    USE precisions
    USE parameters, ONLY: n,m,l,np,mp,lp,ih

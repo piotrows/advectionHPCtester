@@ -11,13 +11,14 @@
 !#define DWARF10
 !#define DWARF11
 !#define DWARF12
+#include  "../src_algorithms/renames.inc"
 PROGRAM advection_dwarf_cartesian_test 
 #ifdef CUDACODE
    USE cudafor
 #endif
-   USE advec_interface_spgpu, ONLY: advec_dwarf_interface_spgpu
-   USE advec_interface_spgpu, ONLY:   allocate_interface_spgpu  
-   USE advec_interface_spgpu, ONLY: deallocate_interface_spgpu  
+   USE advec_interface_spgpu_spgpu, ONLY: advec_dwarf_interface_spgpu
+   USE advec_interface_spgpu_spgpu, ONLY:   allocate_interface_spgpu  
+   USE advec_interface_spgpu_spgpu, ONLY: deallocate_interface_spgpu  
    IMPLICIT NONE
    INTEGER,DIMENSION(100) :: opttype_list,algtype_list,tformat_list 
    INTEGER,PARAMETER :: ipoles=0

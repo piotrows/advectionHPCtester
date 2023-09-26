@@ -1,3 +1,4 @@
+#include  "../advection/src_algorithms/renames.inc"
 MODULE mpi_parallel
 #ifdef CUDACODE
   USE cudafor
@@ -1098,7 +1099,7 @@ END SUBROUTINE sumaxminloc
       DEV_REAL_euwp :: a(1-ih:ndim+ih, 1-ih:mdim+ih,1-ih:ldim+ih)
       CALL ttbeg(21)
 !     IF(isphere*ipoles==0) THEN
-         CALL update3dsplit_GPUd(a,1,n1,1,m1,1,l1,1,ndim,1,mdim,                &
+         CALL update3dsplit_gpud(a,1,n1,1,m1,1,l1,1,ndim,1,mdim,                &
                  1,ldim,ihg,2,2,2,1,1,1,0,ih)
 !     ELSE
 !        CALL update3dsplit_sphere(a,1,n1,1,m1,1,l1,1,ndim,1,mdim,         &
@@ -1297,7 +1298,7 @@ END SUBROUTINE sumaxminloc
       DEV_REAL_euwp :: a(1-ih:ndim+ih, 1-ih:mdim+ih,1-ih:ldim+ih)
       CALL ttbeg(22)
 !     IF(isphere*ipoles==0) THEN
-         CALL update3dsplit_GPUd(a,1,n1,1,m1,1,l1,1,ndim,1,mdim,                &
+         CALL update3dsplit_gpud(a,1,n1,1,m1,1,l1,1,ndim,1,mdim,                &
                  1,ldim,ihg,2,2,2,1,1,0,0,ih)
 !     ELSE
 !        CALL update3dsplit_sphere(a,1,n1,1,m1,1,l1,1,ndim,1,mdim,         &
@@ -1482,7 +1483,7 @@ END SUBROUTINE sumaxminloc
       DEV_REAL_euwp :: a(1-ih:ndim+ih, 1-ih:mdim+ih, 1-ih:ldim+ih)
       CALL ttbeg(23)
 !     IF(isphere*ipoles==0) THEN
-         CALL update3dsplit_GPUd(a,1,n1,1,m1,1,l1,1,ndim,1,mdim,                &
+         CALL update3dsplit_gpud(a,1,n1,1,m1,1,l1,1,ndim,1,mdim,                &
                  1,ldim,ihg,2,0,0,1,1,0,0,ih)
 !     ELSE
 !        CALL update3dsplit_sphere(a,1,n1,1,m1,1,l1,1,ndim,1,mdim,         &
@@ -1682,7 +1683,7 @@ END SUBROUTINE sumaxminloc
       DEV_REAL_euwp :: a(1-ih:ndim+ih, 1-ih:mdim+ih,1-ih:ldim+ih)
       CALL ttbeg(24)
 !     IF(isphere*ipoles==0) THEN
-         CALL update3dsplit_GPUd(a,1,n1,1,m1,1,l1,1,ndim,1,mdim,                &
+         CALL update3dsplit_gpud(a,1,n1,1,m1,1,l1,1,ndim,1,mdim,                &
                  1,ldim,ihg,0,2,0,1,1,0,0,ih)
 !     ELSE
 !        CALL update3dsplit_sphere(a,1,n1,1,m1,1,l1,1,ndim,1,mdim,         &
@@ -1895,7 +1896,7 @@ END SUBROUTINE sumaxminloc
       DEV_REAL_euwp :: a(1-ih:ndim+ih, 1-ih:mdim+ih,1-ih:ldim+ih)
       CALL ttbeg(25)
 !     IF(isphere*ipoles==0) THEN
-         CALL update3dsplit_GPUd(a,1,n1,1,m1,1,l1,1,ndim,1,mdim,                &
+         CALL update3dsplit_gpud(a,1,n1,1,m1,1,l1,1,ndim,1,mdim,                &
                  1,ldim,ihg,0,0,2,1,1,0,0,ih)
 !     ELSE
 !        CALL update3dsplit_sphere(a,1,n1,1,m1,1,l1,1,ndim,1,mdim,         &
@@ -2119,7 +2120,7 @@ END SUBROUTINE sumaxminloc
    END SUBROUTINE updateflt
 ! End of update wrappers
 #if(1==0)
-   SUBROUTINE update3dsplit_GPUd                               &
+   SUBROUTINE update3dsplit_gpud                               &
     (a,nn1,nn2,mm1,mm2,ll1,ll2,ndim1,ndim2,mdim1,mdim2,               &
      ldim1,ldim2,ihg,icomx0,icomy0,icomz0,istart,ifinsh,              &
      isful0,inovar,ih) !iopt,ioptz,imode0,inovar)
@@ -2198,7 +2199,7 @@ END SUBROUTINE sumaxminloc
       mhl=ihr*(m2-m1+1+2*ihr*isful)*(l2-l1+1)
       lhl=(n2-n1+1+2*ihr*isful)*(m2-m1+1+2*ihr*isful)*ihr
 
-!     IF(mype == 0)     PRINT *,'Entering updateGPUd' 
+!     IF(mype == 0)     PRINT *,'Entering updategpud' 
 !     CALL flush
 !     CALL mybarierr()
  
@@ -2777,7 +2778,7 @@ END SUBROUTINE sumaxminloc
 !        ENDIF !ifinsh
       ENDIF !commz
 !  ierr=cudaDeviceSynchronize()
-   END SUBROUTINE update3dsplit_GPUd                                      
+   END SUBROUTINE update3dsplit_gpud                                      
 
    SUBROUTINE update3dsplit                                      &
     (a,nn1,nn2,mm1,mm2,ll1,ll2,ndim1,ndim2,mdim1,mdim2,               &
@@ -4254,7 +4255,7 @@ END SUBROUTINE sumaxminloc
 
 !  ierr=cudaDeviceSynchronize()
    END SUBROUTINE update3dsplit    
-   SUBROUTINE update3dsplit_GPUd &
+   SUBROUTINE update3dsplit_gpud &
     (a,nn1,nn2,mm1,mm2,ll1,ll2,ndim1,ndim2,mdim1,mdim2,               &
      ldim1,ldim2,ihg,icomx0,icomy0,icomz0,istart,ifinsh,              &
      isful,inovar,ih) !iopt,ioptz,imode0,inovar)
@@ -4972,7 +4973,7 @@ END SUBROUTINE sumaxminloc
       ENDIF !commz
 
 !  ierr=cudaDeviceSynchronize()
-   END SUBROUTINE update3dsplit_GPUd    
+   END SUBROUTINE update3dsplit_gpud    
 
    SUBROUTINE update3dsplit_multi                                     &
     (nn1,nn2,mm1,mm2,ll1,ll2,ndim1,ndim2,mdim1,mdim2,               &
@@ -7167,15 +7168,15 @@ END SUBROUTINE sumaxminloc
       clabels(75)='wide updates lrwbtwgsw'
       clabclr(75)='31'
       clabels(79)='ADVcmprsunidriver'
-      clabels(80)='ADVCEonestepGPUBC'
+      clabels(80)='ADVCEonestepgpuBC'
       clabels(81)='ADVCEonestepHBC'
-      clabels(82)='ADVCEtwostepGPUBC'
+      clabels(82)='ADVCEtwostepgpuBC'
       clabels(83)='ADVCEtwostepHBC'
       clabels(84)='ADVCElegacy'
       clabels(85)='ADVCEdriverinit'
-      clabels(86)='ADVanelonestepGPUBC'
+      clabels(86)='ADVanelonestepgpuBC'
       clabels(87)='ADVanelonestepHBC'
-      clabels(88)='ADVaneltwostepGPUBC'
+      clabels(88)='ADVaneltwostepgpuBC'
       clabels(89)='ADVaneltwostepHBC'
       clabels(90)='ADVanellegacy'
       clabclr(79:90)='32'

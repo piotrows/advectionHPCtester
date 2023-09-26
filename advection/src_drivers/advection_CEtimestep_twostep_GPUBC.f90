@@ -1,4 +1,6 @@
-MODULE advection_CEtimestep_twostep_GPUBC
+#include  "../src_algorithms/renames.inc"
+#include "../src_algorithms/defines.inc"
+MODULE advection_CEtimestep_twostep_gpubc
    USE precisions
    USE mpi_parallel, ONLY: update,update_multi,update3,update3_multi
    USE mpi_parallel, ONLY: ttbeg,ttend,iup
@@ -6,6 +8,7 @@ MODULE advection_CEtimestep_twostep_GPUBC
    USE    module_antidiff3d_gauge_gpubc, ONLY: antidiff3d_gauge_gpubc
    USE module_antidiff3d_standard_gpubc, ONLY: antidiff3d_standard_gpubc
    USE            module_upwind3d_gpubc, ONLY:   upwind3d_gpubc 
+   USE mpdataoperators
 #ifdef CUDACODE
    USE cudafor
    USE mpi_parallel, ONLY: istream1,istream2,istream3 
@@ -21,9 +24,7 @@ MODULE advection_CEtimestep_twostep_GPUBC
    IMPLICIT NONE
    INTEGER(KIND=iintegers) icnt,iprint
    CONTAINS
-#include "../src_algorithms/defines.inc"
-#include "../src_algorithms/mpdataoperators.inc"
-
+!#include "../src_algorithms/mpdataoperators.inc"
    SUBROUTINE CE_advection(lupdatemulti,mpdata_alg_choice,liner, &
                             ipoles,ibcx,ibcy,ibcz,np,mp,lp,ih,  & 
                            do_serialization_in,do_serialization_out, &
@@ -191,7 +192,7 @@ MODULE advection_CEtimestep_twostep_GPUBC
      IF(PRESENT(qs)) CALL  update3(qs,np,mp,lp,np,mp,lp,iup,ih)
      IF(PRESENT(qg)) CALL  update3(qg,np,mp,lp,np,mp,lp,iup,ih)
    IF(PRESENT(qg)) THEN
-     CALL upwind_firstep_GPUBC_qg( np,mp,lp,ih,  & 
+     CALL upwind_firstep_gpubc_qg( np,mp,lp,ih,  & 
                            rhr,rhoadv,uadv,vadv,wadv, &     
                            th,  th_lr,  th_bt,    &
                             u,   u_lr,   u_bt,    &
@@ -206,7 +207,7 @@ MODULE advection_CEtimestep_twostep_GPUBC
                            qs,  qs_lr,  qs_bt,    &
                            qg,  qg_lr,  qg_bt) 
    ELSE IF (PRESENT(qs)) THEN 
-     CALL upwind_firstep_GPUBC_qs( np,mp,lp,ih,  & 
+     CALL upwind_firstep_gpubc_qs( np,mp,lp,ih,  & 
                            rhr,rhoadv,uadv,vadv,wadv, &     
                            th,  th_lr,  th_bt,    &
                             u,   u_lr,   u_bt,    &
@@ -220,7 +221,7 @@ MODULE advection_CEtimestep_twostep_GPUBC
                            qi,  qi_lr,  qi_bt,    &
                            qs,  qs_lr,  qs_bt)    
    ELSE IF (PRESENT(qi)) THEN 
-     CALL upwind_firstep_GPUBC_qi( np,mp,lp,ih,  & 
+     CALL upwind_firstep_gpubc_qi( np,mp,lp,ih,  & 
                            rhr,rhoadv,uadv,vadv,wadv, &     
                            th,  th_lr,  th_bt,    &
                             u,   u_lr,   u_bt,    &
@@ -233,7 +234,7 @@ MODULE advection_CEtimestep_twostep_GPUBC
                            qr,  qr_lr,  qr_bt,    &
                            qi,  qi_lr,  qi_bt)     
    ELSE IF (PRESENT(qr)) THEN 
-     CALL upwind_firstep_GPUBC_qr( np,mp,lp,ih,  & 
+     CALL upwind_firstep_gpubc_qr( np,mp,lp,ih,  & 
                            rhr,rhoadv,uadv,vadv,wadv, &     
                            th,  th_lr,  th_bt,    &
                             u,   u_lr,   u_bt,    &
@@ -245,7 +246,7 @@ MODULE advection_CEtimestep_twostep_GPUBC
                            qc,  qc_lr,  qc_bt,    &
                            qr,  qr_lr,  qr_bt)     
    ELSE IF (PRESENT(qc)) THEN 
-     CALL upwind_firstep_GPUBC_qc( np,mp,lp,ih,  & 
+     CALL upwind_firstep_gpubc_qc( np,mp,lp,ih,  & 
                            rhr,rhoadv,uadv,vadv,wadv, &     
                            th,  th_lr,  th_bt,    &
                             u,   u_lr,   u_bt,    &
@@ -256,7 +257,7 @@ MODULE advection_CEtimestep_twostep_GPUBC
                            qv,  qv_lr,  qv_bt,    &
                            qc,  qc_lr,  qc_bt)     
    ELSE IF (PRESENT(qv)) THEN 
-     CALL upwind_firstep_GPUBC_qv( np,mp,lp,ih,  & 
+     CALL upwind_firstep_gpubc_qv( np,mp,lp,ih,  & 
                            rhr,rhoadv,uadv,vadv,wadv, &     
                            th,  th_lr,  th_bt,    &
                             u,   u_lr,   u_bt,    &
@@ -266,7 +267,7 @@ MODULE advection_CEtimestep_twostep_GPUBC
                          pstr,pstr_lr,pstr_bt,    &
                            qv,  qv_lr,  qv_bt)     
    ELSE !no presence of moist variables
-     CALL upwind_firstep_GPUBC_dry( np,mp,lp,ih,  & 
+     CALL upwind_firstep_gpubc_dry( np,mp,lp,ih,  & 
                            rhr,rhoadv,uadv,vadv,wadv, &     
                            th,  th_lr,  th_bt,    &
                             u,   u_lr,   u_bt,    &
@@ -375,7 +376,7 @@ ENDIF
 #endif /*SERIALIZE*/
    END SUBROUTINE CE_advection
 
-   SUBROUTINE upwind_firstep_GPUBC_qg( np,mp,lp,ih,  & 
+   SUBROUTINE upwind_firstep_gpubc_qg( np,mp,lp,ih,  & 
                            rhr,rhoadv,uadv,vadv,wadv, &     
                            th,  th_lr,  th_bt,    &
                             u,   u_lr,   u_bt,    &
@@ -948,9 +949,9 @@ FullXYDomainLoopDC(
 )
           ENDIF !skyedge
 
-   END SUBROUTINE upwind_firstep_GPUBC_qg
+   END SUBROUTINE upwind_firstep_gpubc_qg
 
-   SUBROUTINE upwind_firstep_GPUBC_qs( np,mp,lp,ih,  & 
+   SUBROUTINE upwind_firstep_gpubc_qs( np,mp,lp,ih,  & 
                            rhr,rhoadv,uadv,vadv,wadv, &     
                            th,  th_lr,  th_bt,    &
                             u,   u_lr,   u_bt,    &
@@ -1481,9 +1482,9 @@ FullXYDomainLoopDC(
 )
           ENDIF !skyedge
 
-   END SUBROUTINE upwind_firstep_GPUBC_qs
+   END SUBROUTINE upwind_firstep_gpubc_qs
 
-   SUBROUTINE upwind_firstep_GPUBC_qi( np,mp,lp,ih,  & 
+   SUBROUTINE upwind_firstep_gpubc_qi( np,mp,lp,ih,  & 
                            rhr,rhoadv,uadv,vadv,wadv, &     
                            th,  th_lr,  th_bt,    &
                             u,   u_lr,   u_bt,    &
@@ -1972,9 +1973,9 @@ FullXYDomainLoopDC(
 )
           ENDIF !skyedge
 
-   END SUBROUTINE upwind_firstep_GPUBC_qi
+   END SUBROUTINE upwind_firstep_gpubc_qi
 
-   SUBROUTINE upwind_firstep_GPUBC_qr( np,mp,lp,ih,  & 
+   SUBROUTINE upwind_firstep_gpubc_qr( np,mp,lp,ih,  & 
                            rhr,rhoadv,uadv,vadv,wadv, &     
                            th,  th_lr,  th_bt,    &
                             u,   u_lr,   u_bt,    &
@@ -2417,9 +2418,9 @@ FullXYDomainLoopDC(
 )
           ENDIF !skyedge
 
-   END SUBROUTINE upwind_firstep_GPUBC_qr
+   END SUBROUTINE upwind_firstep_gpubc_qr
 
-   SUBROUTINE upwind_firstep_GPUBC_qc( np,mp,lp,ih,  & 
+   SUBROUTINE upwind_firstep_gpubc_qc( np,mp,lp,ih,  & 
                            rhr,rhoadv,uadv,vadv,wadv, &     
                            th,  th_lr,  th_bt,    &
                             u,   u_lr,   u_bt,    &
@@ -2820,9 +2821,9 @@ FullXYDomainLoopDC(
 )
           ENDIF !skyedge
 
-   END SUBROUTINE upwind_firstep_GPUBC_qc
+   END SUBROUTINE upwind_firstep_gpubc_qc
 
-   SUBROUTINE upwind_firstep_GPUBC_qv( np,mp,lp,ih,  & 
+   SUBROUTINE upwind_firstep_gpubc_qv( np,mp,lp,ih,  & 
                            rhr,rhoadv,uadv,vadv,wadv, &     
                            th,  th_lr,  th_bt,    &
                             u,   u_lr,   u_bt,    &
@@ -3181,9 +3182,9 @@ FullXYDomainLoopDC(
 )
           ENDIF !skyedge
 
-   END SUBROUTINE upwind_firstep_GPUBC_qv
+   END SUBROUTINE upwind_firstep_gpubc_qv
 
-   SUBROUTINE upwind_firstep_GPUBC_dry( np,mp,lp,ih,  & 
+   SUBROUTINE upwind_firstep_gpubc_dry( np,mp,lp,ih,  & 
                            rhr,rhoadv,uadv,vadv,wadv, &     
                            th,  th_lr,  th_bt,    &
                             u,   u_lr,   u_bt,    &
@@ -3493,9 +3494,9 @@ FullXYDomainLoopDC(
 )
           ENDIF !skyedge
 
-   END SUBROUTINE upwind_firstep_GPUBC_dry
+   END SUBROUTINE upwind_firstep_gpubc_dry
 
-   SUBROUTINE upwind_firstep_GPUBC_qg_multiker( np,mp,lp,ih,  & 
+   SUBROUTINE upwind_firstep_gpubc_qg_multiker( np,mp,lp,ih,  & 
                            rhr,rhoadv,uadv,vadv,wadv, &     
                            th,  th_lr,  th_bt,    &
                             u,   u_lr,   u_bt,    &
@@ -4131,6 +4132,6 @@ FullXYDomainLoopDC(
 )
           ENDIF !skyedge
 
-   END SUBROUTINE upwind_firstep_GPUBC_qg_multiker
-END MODULE advection_CEtimestep_twostep_GPUBC
+   END SUBROUTINE upwind_firstep_gpubc_qg_multiker
+END MODULE advection_CEtimestep_twostep_gpubc
 

@@ -119,7 +119,8 @@ MODULE scratch_datafields
 !MPDATA scratch storage
    REAL_euwp, DIMENSION(:,:,:), ALLOCATABLE :: &
       rhr,rhr2,rhr3
-   DEV_REAL_euwp, DIMENSION(:,:,:), ALLOCATABLE :: &
+!  DEV_REAL_euwp, DIMENSION(:,:,:), ALLOCATABLE :: &
+   REAL_euwp, DIMENSION(:,:,:), ALLOCATABLE :: &
       cp,cn,xant !(1-ih:np+ih, 1-ih:mp+ih, 1-ih:lp+ih)
    REAL_euwp, DIMENSION(:,:,:), ALLOCATABLE :: &
       xstore !(1-ih:np+ih, 1-ih:mp+ih, 1-ih:lp+ih)
@@ -127,7 +128,8 @@ MODULE scratch_datafields
       rhoadv,rhoadv2,rhoadv3
    REAL_euwp, DIMENSION(:,:,:), ALLOCATABLE :: &
       uadv,vadv,wadv,wadv2 !(1-ih:np+ih, 1-ih:mp+ih, 1-ih:lp+ih)
-   DEV_REAL_euwp, DIMENSION(:,:,:),  ALLOCATABLE :: &
+!  DEV_REAL_euwp, DIMENSION(:,:,:),  ALLOCATABLE :: &
+   REAL_euwp, DIMENSION(:,:,:),  ALLOCATABLE :: &
       v1,f1,f1ns, & !(1-ih:np+ih+1,1-ih:mp+ih,  1-ih:lp+ih  )
       v2,f2,f2ns, & !(1-ih:np+ih,  1-ih:mp+ih+1,1-ih:lp+ih  )
       v3,f3,f3ns    !(1-ih:np+ih,  1-ih:mp+ih,  1-ih:lp+ih+1)

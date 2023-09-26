@@ -1,3 +1,4 @@
+#include  "../src_algorithms/renames.inc"
 #include "../src_algorithms/defines.inc"
 MODULE advec_driver
    USE precisions
@@ -54,18 +55,18 @@ MODULE advec_driver
         CASE(4)
            SELECT CASE (t_adv)
                   CASE(1)
-                      upwind3d_ptr =>upwind3d_GPUBC
-                    antidiff3d_ptr =>antidiff3d_gauge_GPUBC
+                      upwind3d_ptr =>upwind3d_gpubc
+                    antidiff3d_ptr =>antidiff3d_gauge_gpubc
                     counter_number=55
                   CASE(2)
-                      upwind3d_ptr =>upwind3d_GPUBC
-                    antidiff3d_ptr =>antidiff3d_standard_GPUBC
+                      upwind3d_ptr =>upwind3d_gpubc
+                    antidiff3d_ptr =>antidiff3d_standard_gpubc
                     counter_number=57
                   CASE DEFAULT
                     STOP 'Wrong legacyoptmode in advec_lib'
            END SELECT
         CASE(6)
-                      upwind3d_ptr =>upwind3d_GPUBC
+                      upwind3d_ptr =>upwind3d_gpubc
         CASE DEFAULT
               STOP 'Wrong legacyoptmode in advection driver'
    END SELECT

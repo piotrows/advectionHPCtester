@@ -1,4 +1,4 @@
-MODULE module_mpdata3d_rho_gauge_gpubc
+#include  "../src_algorithms/renames.inc"
 !#ifdef SERIALIZE
 !   USE m_serialize, ONLY: fs_write_field, fs_create_savepoint, fs_read_field, &
 !      fs_read_and_perturb_field, fs_add_savepoint_metainfo

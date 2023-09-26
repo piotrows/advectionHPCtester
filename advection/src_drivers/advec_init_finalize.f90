@@ -1,3 +1,4 @@
+#include  "../src_algorithms/renames.inc"
 MODULE advec_initialize
    USE, INTRINSIC :: iso_c_binding
 #ifdef CUDACODE

@@ -5,7 +5,9 @@ enable_language (Fortran)
 
 set(CMAKE_Fortran_FLAGS "-g ")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
+set(CMAKE_CUDA_VISIBILITY_PRESET hidden)
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+set(CMAKE_C_VISIBILITY_PRESET hidden)
 set(optsprecsp -DFLOAT_PRECISION=4) 
 set(optsprecdp -DFLOAT_PRECISION=8) 
 set(optswithgpu -DCUDACODE -DTIMERSCUDA )
@@ -61,7 +63,7 @@ else()
  set(optstest "")
 endif()
 
-option(ENABLE_FAST "Optimize - ON, Debug - OFF"  ON)
+option(ENABLE_FAST "Optimize - ON, Debug - OFF"  OFF)
 
 if(ENABLE_FAST)
 
@@ -128,16 +130,29 @@ set(advection_alg_sources_preprocess ${advection_alg_sources_preprocess}
 upwind3d-gpubc.f90
 antidiff3d-gauge-gpubc.f90
 antidiff3d-standard-gpubc.f90
-mpdata3d-rho-gauge-gpubc.f90
+#mpdata3d-rho-gauge-gpubc.f90
 velprd_driver.f90
 module_velprd.f90
+mpdataop.f90
 )
 
 set(advection_drv_sources_preprocess ${advection_drv_sources_preprocess}
 advec.f90
 advec_init_finalize.f90
-advection_CEtimestep_twostep_GPUBC.f90
+#advection_CEtimestep_twostep_GPUBC.f90
 )
+
+set(advection_drvint_sources_preprocess ${advection_drvint_sources_preprocess}
+advec_interface_sp.f90
+advec_init_interface_sp.f90
+advec_interface_dp.f90
+advec_init_interface_dp.f90
+advec_interface_spgpu.f90
+advec_init_interface_spgpu.f90
+advec_interface_dpgpu.f90
+advec_init_interface_dpgpu.f90
+)
+
 set(advection_tst_sources_preprocess ${advection_tst_sources_preprocess}
 advection_test_setup.f90
 )
@@ -161,7 +176,7 @@ set(destdir  "${destdir}/${subdir}")
 foreach( file_i ${files})
         message (STATUS "define preprocessing for file: ${destdir}/${file_i}")
         add_custom_command( 
-        COMMAND gcc -E -P ${optsmpi} ${optstest} ${custopt} -cpp  ${localdir}/${file_i}
+		COMMAND gcc -E -P ${optsmpi} ${optstest} ${custopt} -cpp  ${localdir}/${file_i} -DSYMBOLSUFFIX=${DPSPREFIX_BUILDTYPE}
         | sed -e "s/\&/\&\\n/g" -e "s/\;/\;\\n/g" -e "s/>>>/>>>\\n/g" -e "/^$/d" > "${destdir}/${file_i}.pp.f90"
         DEPENDS  ${localdir}/${file_i}
         OUTPUT  ${destdir}/${file_i}.pp.f90
@@ -193,14 +208,16 @@ set(advection_sources )
 define_preprocess_sed(SUBDIR "common"                   BUILDTYPE  ${buildtype}  SOURCEFILES ${common_sources}                   SPECOPTS ${specopts})
 define_preprocess_sed(SUBDIR "common"                   BUILDTYPE  ${buildtype}  SOURCEFILES ${common_sources_preprocess}        SPECOPTS ${specopts})
 define_preprocess_sed(SUBDIR "advection/src_algorithms" BUILDTYPE  ${buildtype}  SOURCEFILES ${advection_alg_sources_preprocess} SPECOPTS ${specopts})
-
 define_preprocess_sed(SUBDIR "advection/src_drivers"    BUILDTYPE  ${buildtype}  SOURCEFILES ${advection_drv_sources_preprocess} SPECOPTS ${specopts})
+define_preprocess_sed(SUBDIR "advection/src_drivers"    BUILDTYPE  ${buildtype}  SOURCEFILES ${driverfile} SPECOPTS ${specopts})
 define_preprocess_sed(SUBDIR "advection/src_testdata"   BUILDTYPE  ${buildtype}  SOURCEFILES ${advection_tst_sources_preprocess} SPECOPTS ${specopts})
 
 list(TRANSFORM advection_alg_sources_preprocess PREPEND ${CMAKE_BINARY_DIR}/${buildtype}/advection/src_algorithms/)
 list(TRANSFORM advection_alg_sources_preprocess APPEND .pp.f90)
 list(TRANSFORM advection_drv_sources_preprocess PREPEND ${CMAKE_BINARY_DIR}/${buildtype}/advection/src_drivers/)
 list(TRANSFORM advection_drv_sources_preprocess APPEND .pp.f90)
+list(TRANSFORM driverfile PREPEND ${CMAKE_BINARY_DIR}/${buildtype}/advection/src_drivers/)
+list(TRANSFORM driverfile APPEND .pp.f90)
 list(TRANSFORM advection_tst_sources_preprocess PREPEND ${CMAKE_BINARY_DIR}/${buildtype}/advection/src_testdata/)
 list(TRANSFORM advection_tst_sources_preprocess APPEND .pp.f90)
 list(APPEND advection_sources ${advection_alg_sources_preprocess} )
@@ -225,13 +242,13 @@ set_target_properties(   common_${buildtype} PROPERTIES LIBRARY_OUTPUT_DIRECTORY
 set_target_properties(advection_${buildtype} PROPERTIES Fortran_MODULE_DIRECTORY ${advectiondir})
 set_target_properties(advection_${buildtype} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${buildtype}/lib)
 if(ongpu)
-	target_compile_options(   common_${buildtype} PRIVATE -cuda) 
-	target_compile_options(advection_${buildtype} PRIVATE -cuda) 
+	target_compile_options(   common_${buildtype} PRIVATE -cuda -Wl,--exclude-libs,ALL ) 
+	target_compile_options(advection_${buildtype} PRIVATE -cuda -Wl,--exclude-libs,ALL ) 
 endif()
 target_include_directories(common_${buildtype} PRIVATE ${commondir} ) 
 target_include_directories(advection_${buildtype} PRIVATE ${advectiondir}) 
 
-list(TRANSFORM driverfile PREPEND ${CMAKE_SOURCE_DIR}/advection/src_drivers/)
+#list(TRANSFORM driverfile PREPEND ${CMAKE_SOURCE_DIR}/advection/src_drivers/)
 if(ongpu)
 	add_library(advection_interface_${buildtype} STATIC ${driverfile})
 else()
@@ -244,9 +261,12 @@ file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
 set_target_properties(advection_interface_${buildtype} PROPERTIES Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
 set_target_properties(advection_interface_${buildtype} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 if(ongpu)
-	target_compile_options(             common_${buildtype} PRIVATE -cuda -gpu=nordc) 
-	target_compile_options(          advection_${buildtype} PRIVATE -cuda -gpu=nordc) 
-	target_compile_options(advection_interface_${buildtype} PRIVATE -cuda -gpu=nordc) 
+	target_compile_options(             common_${buildtype} PRIVATE -cuda -gpu=rdc  -Wl,--exclude-libs,ALL) 
+	target_compile_options(          advection_${buildtype} PRIVATE -cuda -gpu=rdc  -Wl,--exclude-libs,ALL) 
+	target_compile_options(advection_interface_${buildtype} PRIVATE -cuda -gpu=rdc  -Wl,--exclude-libs,ALL) 
+        target_link_options(common_${buildtype}  PUBLIC  -lnvToolsExt -r -cuda -Wl,--exclude-libs,ALL )
+        target_link_options(advection_${buildtype}  PUBLIC  -lnvToolsExt -r  -cuda -Wl,--exclude-libs,ALL )
+        target_link_options(advection_interface_${buildtype}  PUBLIC  -lnvToolsExt -r -cuda -Wl,--exclude-libs,ALL )
 	#	target_link_options(advection_${buildtype} PUBLIC -Xcompiler -fvisibility=hidden ) 
 	#	target_link_options(common_${buildtype} PUBLIC -Xcompiler -fvisibility=hidden ) 
 endif()
@@ -309,9 +329,10 @@ generate_build( ONGPU TRUE SPECOPTS  ${custopts} DRIVERFILES ${driverfile} BUILD
 set(execname_single advectiontest.${buildtype})
 
 add_executable(${execname_single} "advection/src_testapps/advection_dwarf_test_minimal_${buildtype}.f90")
+target_compile_options(${execname_single} PRIVATE -cuda -gpu=rdc ${optswithgpu}) 
 add_dependencies(${execname_single} common_${buildtype} advection_${buildtype} )
 target_link_libraries(advection_interface_${buildtype} PRIVATE  advection_${buildtype})
-target_link_options(${execname_single} PRIVATE -cuda -lnvToolsExt)
+target_link_options(${execname_single} PRIVATE -cuda )# -lnvToolsExt)
 target_link_libraries(${execname_single}  advection_interface_${buildtype})
 if(ENABLE_GPU)
 	target_compile_options(${execname_single} PRIVATE -cuda) 
@@ -327,8 +348,9 @@ set(custopts ${optsprecsp} "${optswithgpu}")
 generate_build( ONGPU TRUE SPECOPTS  ${custopts} DRIVERFILES ${driverfile} BUILDTYPE ${buildtype} )
 set(execname_single advectiontest.${buildtype})
 add_executable(${execname_single} "advection/src_testapps/advection_dwarf_test_minimal_${buildtype}.f90")
+target_compile_options(${execname_single} PRIVATE -cuda -gpu=rdc ${optswithgpu}) 
 add_dependencies(${execname_single} common_${buildtype} advection_${buildtype} )
-target_link_options(${execname_single} PRIVATE -cuda -lnvToolsExt)
+target_link_options(${execname_single} PRIVATE -cuda)# -lnvToolsExt)
 target_link_libraries(advection_interface_${buildtype} PRIVATE  advection_${buildtype})
 target_link_libraries(${execname_single}  advection_interface_${buildtype})
 if(ENABLE_GPU)
@@ -345,19 +367,20 @@ set(buildtypespgpu spgpu)
 set(buildtypedpgpu dpgpu)
 set(execname_single advectiontest.uni)
 add_executable(${execname_single} "advection/src_testapps/advection_dwarf_test_minimal.f90")
+target_compile_options(${execname_single} PRIVATE -r -cuda -gpu=rdc ${optswithgpu}) 
 add_dependencies(${execname_single} advection_interface_${buildtypedp} 
                                     advection_interface_${buildtypesp}   
                                     advection_interface_${buildtypedpgpu}   
                                     advection_interface_${buildtypespgpu}  )
-target_link_options(${execname_single} PUBLIC  -lnvToolsExt -cuda )
+			    #target_link_options(${execname_single} PUBLIC  -lnvToolsExt  -cuda -Wl,--exclude-libs,ALL )
 target_link_libraries(${execname_single} PRIVATE ${MPI_Fortran_LIBRARIES}
-                                    advection_interface_${buildtypedp}  
-                                    advection_interface_${buildtypesp}
-                                    advection_interface_${buildtypedpgpu}  
-                                    advection_interface_${buildtypespgpu}
+	#                                    advection_interface_${buildtypedp}  
+	#                            advection_interface_${buildtypesp}
+	                           advection_interface_${buildtypedpgpu}  
+                                   advection_interface_${buildtypespgpu}
                                     )
 if(ENABLE_GPU)
-	target_compile_options(${execname_single} PRIVATE -cuda -gpu=nordc) 
+	#	target_compile_options(${execname_single} PRIVATE -cuda -gpu=rdc -Wl,--exclude-libs,ALL) 
 endif()
 set_target_properties(${execname_single} PROPERTIES Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
 set_property(TARGET ${exename_single} PROPERTY LINKER_LANGUAGE Fortran)
